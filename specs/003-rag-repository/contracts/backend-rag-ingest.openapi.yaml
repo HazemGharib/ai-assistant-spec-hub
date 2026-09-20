@@ -1,0 +1,126 @@
+openapi: 3.1.0
+info:
+  title: Operator ↔ RAG Ingest Contract
+  version: 0.3.0
+  description: |
+    Synchronous document ingest for ai-assistant-rag.
+    Caller supplies documentId and content bytes; server assigns version.
+    Completes only when the new version is indexed and retrievable, or fails
+    without corrupting the prior active version. No auth (local trust model).
+servers:
+  - url: http://127.0.0.1:3002
+    description: Local RAG default
+paths:
+  /v1/ingest:
+    post:
+      operationId: ingestDocument
+      summary: Ingest Markdown or PDF bytes into the knowledge index
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [documentId, source, content]
+              properties:
+                documentId:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+                  description: Caller-supplied stable document identity
+                source:
+                  type: string
+                  minLength: 1
+                  description: Citation metadata only (not a server filesystem read path)
+                title:
+                  type: string
+                  nullable: true
+                content:
+                  type: string
+                  format: binary
+                  description: Markdown or PDF file bytes (max 5 MiB)
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IngestRequestJson"
+            description: Test-friendly alternative; same semantics as multipart
+      responses:
+        "200":
+          description: Document version fully indexed and retrievable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestResult"
+        "400":
+          description: Validation or unsupported format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: No indexable content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Provider or internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    IngestRequestJson:
+      type: object
+      required: [documentId, source, contentBase64, mediaType]
+      properties:
+        documentId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          pattern: "^[a-zA-Z0-9._:/-]{1,128}$"
+        source:
+          type: string
+          minLength: 1
+        title:
+          type: string
+          nullable: true
+        mediaType:
+          type: string
+          enum: [text/markdown, application/pdf]
+        contentBase64:
+          type: string
+          description: Base64-encoded document bytes
+        version:
+          description: Forbidden — must not be present
+          not: {}
+      additionalProperties: false
+    IngestResult:
+      type: object
+      required: [documentId, version, chunkCount, mediaType]
+      properties:
+        documentId:
+          type: string
+        version:
+          type: integer
+          minimum: 1
+        chunkCount:
+          type: integer
+          minimum: 1
+        mediaType:
+          type: string
+          enum: [text/markdown, application/pdf]
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - UNSUPPORTED_FORMAT
+            - NO_CONTENT
+            - PROVIDER_ERROR
+            - INTERNAL_ERROR
+        message:
+          type: string

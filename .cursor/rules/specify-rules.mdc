@@ -6,11 +6,13 @@ alwaysApply: true
 
 # ai-assistant-spec-hub Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-09-20
+Auto-generated from all feature plans. Last updated: 2026-09-21
 
 ## Active Technologies
 - TypeScript ~6 / React 19 / Node.js 22+ (UI Vite app); contracts & backend remain TypeScript on Node 22 + `@assistant-ui/react` (existing); `@hazemgharib/ai-agent-contracts` 0.2.0; Vite; Vitest; oxlint; Prettier; pnpm — all free/OSS, $0 (002-conversational-ui)
 - None in UI (ephemeral client state only). Conversation/message persistence owned by backend or in-memory mock implementing the same contrac (002-conversational-ui)
+- TypeScript ~5.8 / Node.js 22+ (`ai-assistant-rag`); contracts package TypeScript on Node 22 + Hono + `@hono/node-server` (existing); Zod via `@hazemgharib/ai-agent-contracts` **0.3.0**; Vitest; oxlint; Prettier; pnpm; PDF text extract (OSS, e.g. `pdf-parse` or equivalent); Markdown normalize (lightweight OSS or minimal custom); local embedding via `@xenova/transformers` (optional quality path) + deterministic embedding for CI; no paid APIs (003-rag-repository)
+- Local data directory (`DATA_DIR`, default `./data`) for document registry + vector index persistence; in-memory store for unit tests; no AWS/OpenSearch required (003-rag-repository)
 
 - TypeScript 5.x+ / Node.js 22 LTS (align engines across repos); UI already on TypeScript ~6 + React 19 + pnpm (matches `ai-assistant-ui`); Vitest; oxlint; Prettier; Hono (lightweight HTTP for backend/RAG stubs); `@modelcontextprotocol/sdk` (MCP stub server); Zod (schema validation shared via contracts where appropriate); `@assistant-ui/react` (existing UI) — all free/OSS, $0 (001-platform-foundation)
 
@@ -30,6 +32,7 @@ npm test && npm run lint
 TypeScript 5.x+ / Node.js 22 LTS (align engines across repos); UI already on TypeScript ~6 + React 19: Follow standard conventions
 
 ## Recent Changes
+- 003-rag-repository: Added TypeScript ~5.8 / Node.js 22+ (`ai-assistant-rag`); contracts package TypeScript on Node 22 + Hono + `@hono/node-server` (existing); Zod via `@hazemgharib/ai-agent-contracts` **0.3.0**; Vitest; oxlint; Prettier; pnpm; PDF text extract (OSS, e.g. `pdf-parse` or equivalent); Markdown normalize (lightweight OSS or minimal custom); local embedding via `@xenova/transformers` (optional quality path) + deterministic embedding for CI; no paid APIs
 - 002-conversational-ui: Added TypeScript ~6 / React 19 / Node.js 22+ (UI Vite app); contracts & backend remain TypeScript on Node 22 + `@assistant-ui/react` (existing); `@hazemgharib/ai-agent-contracts` 0.2.0; Vite; Vitest; oxlint; Prettier; pnpm — all free/OSS, $0
 
 - 001-platform-foundation: Added TypeScript 5.x+ / Node.js 22 LTS (align engines across repos); UI already on TypeScript ~6 + React 19 + pnpm (matches `ai-assistant-ui`); Vitest; oxlint; Prettier; Hono (lightweight HTTP for backend/RAG stubs); `@modelcontextprotocol/sdk` (MCP stub server); Zod (schema validation shared via contracts where appropriate); `@assistant-ui/react` (existing UI) — all free/OSS, $0

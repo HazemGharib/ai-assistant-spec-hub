@@ -103,7 +103,7 @@ A developer runs only the RAG repository locally, ingests sample documents, and 
 
 ### Edge Cases
 
-- Empty document body (valid format but no extractable text): ingest fails or completes with an explicit “no indexable content” outcome; nothing spurious is retrievable for that document.
+- Empty document body (valid format but no extractable text): ingest fails with `NO_CONTENT`; nothing is retrievable for that attempt; prior active version (if any) is unchanged.
 - Extremely large documents: service enforces a documented size/page limit; oversize inputs are rejected clearly rather than hanging or exhausting local resources unbounded.
 - Query with empty or whitespace-only text: rejected as invalid input.
 - Concurrent ingest of the same document identity: service serializes or otherwise ensures one active version wins; no corrupt mixed-version index for that document.
