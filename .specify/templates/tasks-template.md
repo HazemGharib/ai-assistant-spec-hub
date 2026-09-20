@@ -20,11 +20,11 @@ description: "Task list template for feature implementation"
 
 ## Path Conventions
 
-- **Single project**: `src/`, `tests/` at repository root
-- **Web app**: `backend/src/`, `frontend/src/`
-- **Mobile**: `api/src/`, `ios/src/` or `android/src/`
-- Paths shown below assume single project - adjust based on plan.md structure
-
+- **Preferred (constitution)**: `packages/agent|rag|mcp|llm|storage|ui/`, co-located or root `tests/`
+- **Apps + packages**: `apps/web/`, `apps/api/`, plus `packages/*`
+- **Legacy single project**: `src/`, `tests/` at repository root
+- Paths shown below assume packages layout - adjust based on plan.md structure
+- Tests MUST NOT require paid cloud services (mocks, fixtures, local providers)
 <!-- 
   ============================================================================
   IMPORTANT: The tasks below are SAMPLE TASKS for illustration purposes only.
@@ -60,15 +60,14 @@ description: "Task list template for feature implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-Examples of foundational tasks (adjust based on your project):
+Examples of foundational tasks (adjust based on your project / constitution):
 
-- [ ] T004 Setup database schema and migrations framework
-- [ ] T005 [P] Implement authentication/authorization framework
-- [ ] T006 [P] Setup API routing and middleware structure
-- [ ] T007 Create base models/entities that all stories depend on
-- [ ] T008 Configure error handling and logging infrastructure
-- [ ] T009 Setup environment configuration management
-
+- [ ] T004 Setup package boundaries (`packages/agent|rag|mcp|llm|storage|ui` or plan equivalent)
+- [ ] T005 [P] Externalize env config; ensure secrets never committed
+- [ ] T006 [P] Provider interfaces/adapters for LLM/embeddings/storage (local default)
+- [ ] T007 Create shared types/schemas for MCP tools and RAG chunk metadata
+- [ ] T008 Configure error handling and local-first observability/logging
+- [ ] T009 Setup test harness with fixtures/mocks (no paid cloud required)
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
 ---
@@ -150,11 +149,12 @@ Examples of foundational tasks (adjust based on your project):
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] TXXX [P] Documentation updates in docs/
-- [ ] TXXX Code cleanup and refactoring
-- [ ] TXXX Performance optimization across all stories
-- [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
-- [ ] TXXX Security hardening
+- [ ] TXXX [P] Documentation updates (local setup, env, architecture, cost, security)
+- [ ] TXXX Code cleanup and refactoring (no unjustified new infrastructure)
+- [ ] TXXX [P] Subsystem tests: parsing/chunking/retrieval/tools/orchestration as touched
+- [ ] TXXX [P] Evaluation cases (question→docs/tools/answer traits) if RAG/agent involved
+- [ ] TXXX Security review: tool auth boundaries, prompt-injection, secrets
+- [ ] TXXX Verify feature works with paid/cloud integrations disabled
 - [ ] TXXX Run quickstart.md validation
 
 ---

@@ -17,21 +17,34 @@
   the iteration process.
 -->
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: TypeScript / Node.js [or NEEDS CLARIFICATION]  
+**Primary Dependencies**: [e.g., assistant-ui, MCP SDK, local vector store — justify paid/lock-in]  
+**Storage**: [local docs/vectors by default; AWS S3/OpenSearch as portable adapters]  
+**Testing**: [unit/integration/evaluation without paid cloud — or NEEDS CLARIFICATION]  
+**Target Platform**: Local-first MVP; AWS as deployment target (not hard dependency)  
+**Project Type**: Modular monolith (packages: agent, rag, mcp, llm, storage, ui)  
+**Performance Goals**: [domain-specific or NEEDS CLARIFICATION; defer premature optimization]  
+**Constraints**: $0 default infra; secrets never in repo; provider adapters; security for untrusted RAG/tool I/O  
+**Scale/Scope**: [domain-specific, e.g., MVP RAG + MCP + orchestration demo or NEEDS CLARIFICATION]
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+*Source: `.specify/memory/constitution.md` (TypeScript RAG AI Agent Platform)*
 
-[Gates determined based on constitution file]
+- [ ] TypeScript/Node for frontend and agent services; secrets not in source control
+- [ ] Clear UI → Agent → (RAG | MCP) separation; UI not coupled to agent internals
+- [ ] Feature runs locally without AWS; paid/cloud deps optional and documented
+- [ ] Zero-cost default: any paid service justified (why, alternatives, cost, removable?)
+- [ ] Provider-specific code behind interfaces (LLM, embeddings, vector, storage)
+- [ ] RAG used only for knowledge retrieval—not for authoritative structured queries
+- [ ] MCP tools schema-validated, independently testable; no blind tool-calling
+- [ ] Security: untrusted docs/tool output; no prompt-injection override of system instructions
+- [ ] Tests cover affected subsystems without paid cloud; observability path considered
+- [ ] No unjustified complexity (K8s, microservices, managed vector DB, etc.)
+- [ ] Docs/ADR impact noted if architecture or cost posture changes
+
+Violations MUST be listed in Complexity Tracking below with justification.
 
 ## Project Structure
 
@@ -56,49 +69,41 @@ specs/[###-feature]/
 -->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+# Preferred (constitution): modular monolith with package boundaries
+packages/
+├── agent/          # orchestration
+├── rag/            # ingest + retrieve
+├── mcp/            # tools/capabilities
+├── llm/            # provider adapters
+├── storage/        # docs/vectors/objects
+└── ui/             # conversational UI (e.g. assistant-ui)
 
-tests/
-├── contract/
+# [REMOVE IF UNUSED] Alternative: apps + packages
+apps/
+├── web/
+└── api/
+packages/
+├── agent/
+├── rag/
+├── mcp/
+├── llm/
+└── storage/
+
+tests/              # or co-located per package
+├── unit/
 ├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+└── evaluation/     # RAG/tool-selection cases (no paid cloud required)
 ```
 
 **Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+directories captured above. Prefer modular monolith over microservices unless
+Complexity Tracking justifies otherwise.]
 
 ## Complexity Tracking
 
 > **Fill ONLY if Constitution Check has violations that must be justified**
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
+| ----------- | ------------ | ------------------------------------- |
 | [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
 | [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |

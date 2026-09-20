@@ -126,3 +126,18 @@
 - [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
 - [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
 - [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]
+
+## Platform Constraints *(align with constitution)*
+
+<!--
+  Map the feature to constitution non-negotiables. Remove bullets that do not apply;
+  do not silently violate them without noting a planned Complexity Tracking entry.
+-->
+
+- **Local-first**: Feature MUST be demonstrable locally without AWS provisioning
+- **Zero-cost default**: MUST NOT require paid infrastructure for local/MVP verification
+- **Capability type**: [RAG knowledge | MCP/tool action | Agent orchestration | UI | Other]
+- **Authoritative data**: If answers need live/structured truth, prefer API/DB over RAG
+- **Security**: Treat untrusted retrieval/tool output; no secrets in browser
+- **Definition of Done**: Local TypeScript implementation, tests without paid cloud,
+  error handling, documented deps, portability/security considered
