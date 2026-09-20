@@ -1,0 +1,182 @@
+openapi: 3.1.0
+info:
+  title: UI ↔ Backend Chat Contract
+  version: 0.1.0
+  description: |
+    Conversation boundary between ai-assistant-ui and ai-assistant-backend.
+    Implemented in @ai-assistant/contracts (chat module). No auth in Phase 1.
+servers:
+  - url: http://127.0.0.1:3001
+    description: Local backend default
+paths:
+  /health:
+    get:
+      operationId: backendHealth
+      summary: Liveness for isolated smoke
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /v1/chat:
+    post:
+      operationId: postChat
+      summary: Send a user message and receive an assistant reply
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatRequest"
+      responses:
+        "200":
+          description: Assistant response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Upstream RAG/MCP unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        contractPackageVersion:
+          type: string
+          description: Semver of @ai-assistant/contracts in use
+    ChatRequest:
+      type: object
+      required: [conversationId, message]
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+        message:
+          $ref: "#/components/schemas/ChatMessage"
+        smoke:
+          type: object
+          description: Optional flags for integrated smoke verification
+          properties:
+            requireRag:
+              type: boolean
+              default: false
+            requireMcp:
+              type: boolean
+              default: false
+    ChatMessage:
+      type: object
+      required: [messageId, role, content, createdAt]
+      properties:
+        messageId:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [user]
+        content:
+          type: string
+          minLength: 1
+        createdAt:
+          type: string
+          format: date-time
+    Citation:
+      type: object
+      required: [documentId, source]
+      properties:
+        documentId:
+          type: string
+        source:
+          type: string
+        title:
+          type: string
+          nullable: true
+        chunkId:
+          type: string
+          nullable: true
+    ToolInvocationSummary:
+      type: object
+      required: [name, ok]
+      properties:
+        name:
+          type: string
+        ok:
+          type: boolean
+        detail:
+          type: string
+          nullable: true
+    ChatResponse:
+      type: object
+      required: [conversationId, message, diagnostics]
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+        message:
+          type: object
+          required: [messageId, role, content, createdAt]
+          properties:
+            messageId:
+              type: string
+              format: uuid
+            role:
+              type: string
+              enum: [assistant]
+            content:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+        citations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Citation"
+        toolInvocations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ToolInvocationSummary"
+        diagnostics:
+          type: object
+          required: [hitRag, hitMcp, contractPackageVersion]
+          properties:
+            hitRag:
+              type: boolean
+            hitMcp:
+              type: boolean
+            contractPackageVersion:
+              type: string
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [VALIDATION_ERROR, UPSTREAM_UNAVAILABLE, INTERNAL_ERROR]
+        message:
+          type: string
+        boundary:
+          type: string
+          description: Which hop failed (rag|mcp|backend)
+          nullable: true
