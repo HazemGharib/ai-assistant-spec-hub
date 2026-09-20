@@ -9,6 +9,8 @@ alwaysApply: true
 Auto-generated from all feature plans. Last updated: 2026-09-20
 
 ## Active Technologies
+- TypeScript ~6 / React 19 / Node.js 22+ (UI Vite app); contracts & backend remain TypeScript on Node 22 + `@assistant-ui/react` (existing); `@hazemgharib/ai-agent-contracts` 0.2.0; Vite; Vitest; oxlint; Prettier; pnpm — all free/OSS, $0 (002-conversational-ui)
+- None in UI (ephemeral client state only). Conversation/message persistence owned by backend or in-memory mock implementing the same contrac (002-conversational-ui)
 
 - TypeScript 5.x+ / Node.js 22 LTS (align engines across repos); UI already on TypeScript ~6 + React 19 + pnpm (matches `ai-assistant-ui`); Vitest; oxlint; Prettier; Hono (lightweight HTTP for backend/RAG stubs); `@modelcontextprotocol/sdk` (MCP stub server); Zod (schema validation shared via contracts where appropriate); `@assistant-ui/react` (existing UI) — all free/OSS, $0 (001-platform-foundation)
 
@@ -28,6 +30,7 @@ npm test && npm run lint
 TypeScript 5.x+ / Node.js 22 LTS (align engines across repos); UI already on TypeScript ~6 + React 19: Follow standard conventions
 
 ## Recent Changes
+- 002-conversational-ui: Added TypeScript ~6 / React 19 / Node.js 22+ (UI Vite app); contracts & backend remain TypeScript on Node 22 + `@assistant-ui/react` (existing); `@hazemgharib/ai-agent-contracts` 0.2.0; Vite; Vitest; oxlint; Prettier; pnpm — all free/OSS, $0
 
 - 001-platform-foundation: Added TypeScript 5.x+ / Node.js 22 LTS (align engines across repos); UI already on TypeScript ~6 + React 19 + pnpm (matches `ai-assistant-ui`); Vitest; oxlint; Prettier; Hono (lightweight HTTP for backend/RAG stubs); `@modelcontextprotocol/sdk` (MCP stub server); Zod (schema validation shared via contracts where appropriate); `@assistant-ui/react` (existing UI) — all free/OSS, $0
 

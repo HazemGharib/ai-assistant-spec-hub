@@ -34,7 +34,7 @@ Every contracts/runtime repo `.github/workflows/ci.yml` should:
 1. Checkout
 2. Setup Node 22 + pnpm
 3. `pnpm install`
-4. For consumers: install `@hazemgharib/ai-agent-contracts@0.1.0` from GitHub Packages (`NODE_AUTH_TOKEN`); locally you may `pnpm link` a built contracts package before first publish
+4. For consumers: install `@hazemgharib/ai-agent-contracts@0.2.0` from GitHub Packages (`NODE_AUTH_TOKEN`); locally you may `pnpm link` a built contracts package when iterating before publish
 5. `pnpm lint`
 6. `pnpm typecheck`
 7. `pnpm test`
@@ -42,7 +42,7 @@ Every contracts/runtime repo `.github/workflows/ci.yml` should:
 
 ## Contracts dependency rule
 
-- Depend on `"@hazemgharib/ai-agent-contracts": "0.1.0"` (GitHub Packages). CI must not sibling-checkout contracts source.
+- Depend on `"@hazemgharib/ai-agent-contracts": "0.2.0"` (GitHub Packages). CI must not sibling-checkout contracts source.
 - **Never** `"file:../ai-assistant-contracts/src"` or relative imports into sibling `src`.
 - Audit helper: [`../specs/001-platform-foundation/scripts/assert-no-src-path-deps.sh`](../specs/001-platform-foundation/scripts/assert-no-src-path-deps.sh)
 
