@@ -1,0 +1,35 @@
+---
+description: Project Development Guidelines
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# ai-assistant-spec-hub Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2026-09-20
+
+## Active Technologies
+
+- TypeScript 5.x+ / Node.js 22 LTS (align engines across repos); UI already on TypeScript ~6 + React 19 + pnpm (matches `ai-assistant-ui`); Vitest; oxlint; Prettier; Hono (lightweight HTTP for backend/RAG stubs); `@modelcontextprotocol/sdk` (MCP stub server); Zod (schema validation shared via contracts where appropriate); `@assistant-ui/react` (existing UI) — all free/OSS, $0 (001-platform-foundation)
+
+## Project Structure
+
+```text
+src/
+tests/
+```
+
+## Commands
+
+npm test && npm run lint
+
+## Code Style
+
+TypeScript 5.x+ / Node.js 22 LTS (align engines across repos); UI already on TypeScript ~6 + React 19: Follow standard conventions
+
+## Recent Changes
+
+- 001-platform-foundation: Added TypeScript 5.x+ / Node.js 22 LTS (align engines across repos); UI already on TypeScript ~6 + React 19 + pnpm (matches `ai-assistant-ui`); Vitest; oxlint; Prettier; Hono (lightweight HTTP for backend/RAG stubs); `@modelcontextprotocol/sdk` (MCP stub server); Zod (schema validation shared via contracts where appropriate); `@assistant-ui/react` (existing UI) — all free/OSS, $0
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->
