@@ -35,10 +35,10 @@ All Technical Context unknowns are resolved below. No remaining NEEDS CLARIFICAT
 
 ## 3. Contracts package distribution (local / $0)
 
-**Decision**: Publish `@ai-assistant/contracts` as a normal package with semver in `package.json`. For Phase 1 local/offline consumption:
+**Decision**: Publish `@hazemgharib/ai-agent-contracts` as a normal package with semver in `package.json`. For Phase 1 local/offline consumption:
 
 1. In contracts repo: `pnpm pack` → produces `ai-assistant-contracts-0.1.0.tgz` (or equivalent name)
-2. Consumers depend on `"@ai-assistant/contracts": "0.1.0"` resolved via `"@ai-assistant/contracts": "file:../ai-assistant-contracts"` **or** `file:../path/to/ai-assistant-contracts-0.1.0.tgz`
+2. Consumers depend on `"@hazemgharib/ai-agent-contracts": "0.1.0"` resolved via `"@hazemgharib/ai-agent-contracts": "file:../ai-assistant-contracts"` **or** `file:../path/to/ai-assistant-contracts-0.1.0.tgz`
 3. Prefer **`file:../ai-assistant-contracts`** during active development with a CI/script check that consumer’s required version range is satisfied by the contracts package version
 4. Document that a private registry is optional later; not required for Phase 1
 
@@ -81,7 +81,7 @@ All Technical Context unknowns are resolved below. No remaining NEEDS CLARIFICAT
 
 ## 6. Schema / validation library
 
-**Decision**: **Zod** schemas colocated in `@ai-assistant/contracts`, with TypeScript types inferred/exported. OpenAPI YAML in `specs/.../contracts/` remains the human/design source; package implements equivalent runtime schemas.
+**Decision**: **Zod** schemas colocated in `@hazemgharib/ai-agent-contracts`, with TypeScript types inferred/exported. OpenAPI YAML in `specs/.../contracts/` remains the human/design source; package implements equivalent runtime schemas.
 
 **Rationale**: Runtime validation at service boundaries; shared between consumers/providers; TypeScript ergonomics.
 

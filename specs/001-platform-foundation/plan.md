@@ -69,7 +69,7 @@ ai-assistant/                          # workspace root (not a monorepo)
 ├── ai-assistant-spec-hub/             # specs, constitution, planning (this repo)
 ├── ai-assistant-ui/                   # existing React + assistant-ui
 │   ├── src/adapters/                  # swap local stub → HTTP backend client
-│   ├── package.json                   # depends on @ai-assistant/contracts
+│   ├── package.json                   # depends on @hazemgharib/ai-agent-contracts
 │   └── .github/workflows/ci.yml
 ├── ai-assistant-contracts/            # NEW — versioned contracts package
 │   ├── src/
@@ -77,7 +77,7 @@ ai-assistant/                          # workspace root (not a monorepo)
 │   │   ├── retrieve/                  # backend↔RAG
 │   │   ├── mcp/                       # backend↔MCP capability descriptors
 │   │   └── index.ts
-│   ├── package.json                   # name: @ai-assistant/contracts
+│   ├── package.json                   # name: @hazemgharib/ai-agent-contracts
 │   └── .github/workflows/ci.yml
 ├── ai-assistant-backend/              # NEW — orchestration HTTP service
 │   ├── src/
@@ -113,7 +113,7 @@ ai-assistant/                          # workspace root (not a monorepo)
 
 ## Implementation Approach (for `/speckit.tasks`)
 
-1. Bootstrap `ai-assistant-contracts` (`@ai-assistant/contracts` v0.1.0) from OpenAPI/MD contracts in this feature folder.
+1. Bootstrap `ai-assistant-contracts` (`@hazemgharib/ai-agent-contracts` v0.1.0) from OpenAPI/MD contracts in this feature folder.
 2. Scaffold backend, RAG, MCP repos with shared TS/lint/test/CI conventions; adapt UI to same conventions where missing (tests, format, CI).
 3. Implement stub HTTP/MCP surfaces conforming to contracts; wire backend stub orchestrator to call RAG retrieve + MCP tool for smoke.
 4. Point UI adapter at backend chat endpoint (env-configured); keep local-only stub adapter as fallback for isolated UI runs.

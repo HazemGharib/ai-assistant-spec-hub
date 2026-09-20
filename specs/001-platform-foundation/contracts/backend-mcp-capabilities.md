@@ -1,8 +1,8 @@
 # Backend ↔ MCP Capabilities Contract
 
 **Contract ID**: `backend-mcp-capabilities`  
-**Package module**: `@ai-assistant/contracts/mcp`  
-**Version**: follows `@ai-assistant/contracts` semver (initial `0.1.0`)  
+**Package module**: `@hazemgharib/ai-agent-contracts/mcp`  
+**Version**: follows `@hazemgharib/ai-agent-contracts` semver (initial `0.1.0`)  
 **Provider**: `ai-assistant-mcp`  
 **Consumer**: `ai-assistant-backend`  
 **Auth**: none (Phase 1 localhost trust)

@@ -1,6 +1,6 @@
 # Boundary Contracts (Design Sources)
 
-These files are the **design-time** contract sources for Phase 1. The implementable artifact is the `@ai-assistant/contracts` package produced by repository `ai-assistant-contracts`.
+These files are the **design-time** contract sources for Phase 1. The implementable artifact is the `@hazemgharib/ai-agent-contracts` package produced by repository `ai-assistant-contracts`.
 
 | Contract ID | Boundary | Spec file |
 |-------------|----------|-----------|

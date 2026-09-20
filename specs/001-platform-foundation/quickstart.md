@@ -4,16 +4,18 @@ Local-first guide for the multi-repo foundation. **$0** — no AWS, no API keys 
 
 ## Ownership map
 
+Full ownership table, ports, and SC-001 quiz: [`../../overall-context/ownership.md`](../../overall-context/ownership.md).
+
 | Repository | Owns | Does not own |
 | ------------ | ------ | -------------- |
 | `ai-assistant-ui` | Chat presentation, client UX | Orchestration, RAG, MCP tools |
 | `ai-assistant-backend` | Orchestration, UI chat API, RAG/MCP clients | Index storage, tool server impl |
 | `ai-assistant-rag` | Retrieve stub / future ingestion+retrieval | Chat UX, MCP tools |
-| `ai-assistant-mcp` | MCP tool/resource server | Chat UX, vector index |
+| `ai-assistant-mcp` | MCP tool/resource server (HTTP `:3003`) | Chat UX, vector index |
 | `ai-assistant-contracts` | Versioned boundary schemas/package | Runtime business behavior |
 | `ai-assistant-spec-hub` | Specs, constitution, plans | Runtime services |
 
-Boundaries: **UI → backend → (RAG | MCP)** via `@ai-assistant/contracts` only.
+Boundaries: **UI → backend → (RAG | MCP)** via `@hazemgharib/ai-agent-contracts` only.
 
 ## Prerequisites
 
@@ -33,14 +35,16 @@ ai-assistant/
 
 ## Install contracts package (all runtime repos)
 
-From `ai-assistant-contracts`:
+Consumers depend on **`@hazemgharib/ai-agent-contracts@0.1.0`** from **GitHub Packages** (not a sibling `file:` checkout).
 
 ```bash
+# 1. Publish once from ai-assistant-contracts (tag v0.1.0 or workflow_dispatch)
+# 2. Add auth to ~/.npmrc:  //npm.pkg.github.com/:_authToken=<PAT read:packages>
+# 3. In each runtime repo:
 pnpm install
-pnpm build
-# consumers use file: dependency, e.g. in package.json:
-# "@ai-assistant/contracts": "file:../ai-assistant-contracts"
 ```
+
+Local offline before publish: `pnpm build` in contracts, then link it into each consumer's `node_modules/@hazemgharib/ai-agent-contracts` (see contracts README).
 
 Pin/respect the package `version` field (start at `0.1.0`). See [contracts/versioning.md](./contracts/versioning.md).
 
@@ -70,8 +74,24 @@ Default ports: UI `5173`, backend `3001`, RAG `3002`, MCP `3003` (if HTTP).
 
 ### 1. Start providers
 
+**One-shot (recommended):** from the `ai-assistant/` workspace root (sibling of the repos):
+
 ```bash
-# terminals
+# Parallel build of all repos, then start the stack (Ctrl+C stops everything)
+./ai-assistant-spec-hub/scripts/dev-local.sh
+
+# Watch mode instead of production start/preview
+./ai-assistant-spec-hub/scripts/dev-local.sh --dev
+
+# Also run the integrated smoke once healthy
+./ai-assistant-spec-hub/scripts/dev-local.sh --smoke
+
+# Options: --install | --build-only | --no-build | --help
+```
+
+**Manual (separate terminals):**
+
+```bash
 cd ai-assistant-rag && pnpm dev
 cd ai-assistant-mcp && pnpm dev
 cd ai-assistant-backend && \
@@ -107,7 +127,7 @@ curl -s http://127.0.0.1:3001/v1/chat \
 - HTTP 200
 - `diagnostics.hitRag === true`
 - `diagnostics.hitMcp === true`
-- `diagnostics.contractPackageVersion` matches installed `@ai-assistant/contracts`
+- `diagnostics.contractPackageVersion` matches installed `@hazemgharib/ai-agent-contracts`
 - No paid cloud credentials used
 
 If a sibling is down, error `code` should be `UPSTREAM_UNAVAILABLE` with `boundary` set; isolated `pnpm test` in each repo must still pass.

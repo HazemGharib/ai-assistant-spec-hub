@@ -1,6 +1,6 @@
 # Contracts Package Versioning
 
-**Package**: `@ai-assistant/contracts`  
+**Package**: `@hazemgharib/ai-agent-contracts`  
 **Source repo**: `ai-assistant-contracts`  
 **Initial version**: `0.1.0`
 
@@ -17,7 +17,7 @@ Phase 1 ships all three boundaries in one package version. A breaking change to 
 ## Consumer rules
 
 1. Depend on an **explicit** version (e.g. `"0.1.0"` or `"^0.1.0"` with awareness that MAJOR must be deliberate).
-2. Obtain the package via documented `file:` / packed tarball method—not by importing `ai-assistant-contracts/src`.
+2. Obtain the package from **GitHub Packages** as `@hazemgharib/ai-agent-contracts@<semver>` (CI default). Local offline MAY use `pnpm link` or a packed `.tgz` of the same version—not by importing `ai-assistant-contracts/src`.
 3. After a MAJOR bump, providers and consumers MUST upgrade together before integrated smoke is considered green.
 
 ## Compatibility detection

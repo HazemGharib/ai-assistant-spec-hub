@@ -4,7 +4,7 @@ info:
   version: 0.1.0
   description: |
     Conversation boundary between ai-assistant-ui and ai-assistant-backend.
-    Implemented in @ai-assistant/contracts (chat module). No auth in Phase 1.
+    Implemented in @hazemgharib/ai-agent-contracts (chat module). No auth in Phase 1.
 servers:
   - url: http://127.0.0.1:3001
     description: Local backend default
@@ -66,7 +66,7 @@ components:
           enum: [ok]
         contractPackageVersion:
           type: string
-          description: Semver of @ai-assistant/contracts in use
+          description: Semver of @hazemgharib/ai-agent-contracts in use
     ChatRequest:
       type: object
       required: [conversationId, message]

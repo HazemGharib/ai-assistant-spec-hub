@@ -41,10 +41,10 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-contracts/sr
 
 **Purpose**: Create sibling repositories and workspace wiring so implementation has a place to land
 
-- [ ] T001 Create sibling git repositories `ai-assistant-contracts`, `ai-assistant-backend`, `ai-assistant-rag`, and `ai-assistant-mcp` under `/Users/zuka/coding/ai-assistant/` (init git, default branch, empty README placeholders)
-- [ ] T002 Update `/Users/zuka/coding/ai-assistant/ai-assistant.code-workspace` to include all six folders (`spec-hub`, `ui`, `contracts`, `backend`, `rag`, `mcp`)
-- [ ] T003 [P] Add root-level `.gitignore` patterns for secrets (`.env`, `*.pem`, `*.tgz` optional) in each new repo: `ai-assistant-contracts/.gitignore`, `ai-assistant-backend/.gitignore`, `ai-assistant-rag/.gitignore`, `ai-assistant-mcp/.gitignore`
-- [ ] T004 [P] Copy design contract sources note into `ai-assistant-contracts/README.md` linking to `ai-assistant-spec-hub/specs/001-platform-foundation/contracts/`
+- [X] T001 Create sibling git repositories `ai-assistant-contracts`, `ai-assistant-backend`, `ai-assistant-rag`, and `ai-assistant-mcp` under `/Users/zuka/coding/ai-assistant/` (init git, default branch, empty README placeholders)
+- [X] T002 Update `/Users/zuka/coding/ai-assistant/ai-assistant.code-workspace` to include all six folders (`spec-hub`, `ui`, `contracts`, `backend`, `rag`, `mcp`)
+- [X] T003 [P] Add root-level `.gitignore` patterns for secrets (`.env`, `*.pem`, `*.tgz` optional) in each new repo: `ai-assistant-contracts/.gitignore`, `ai-assistant-backend/.gitignore`, `ai-assistant-rag/.gitignore`, `ai-assistant-mcp/.gitignore`
+- [X] T004 [P] Copy design contract sources note into `ai-assistant-contracts/README.md` linking to `ai-assistant-spec-hub/specs/001-platform-foundation/contracts/`
 
 ---
 
@@ -54,20 +54,20 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-contracts/sr
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Initialize `ai-assistant-contracts/package.json` as `@ai-assistant/contracts@0.1.0` with pnpm, TypeScript, Vitest, oxlint, Prettier, Zod; scripts `build`, `test`, `lint`, `typecheck`, `format`, `format:check`
-- [ ] T006 Implement chat Zod schemas/types from `ai-assistant-spec-hub/specs/001-platform-foundation/contracts/ui-backend-chat.openapi.yaml` in `ai-assistant-contracts/src/chat/index.ts`
-- [ ] T007 [P] Implement retrieve Zod schemas/types from `ai-assistant-spec-hub/specs/001-platform-foundation/contracts/backend-rag-retrieve.openapi.yaml` in `ai-assistant-contracts/src/retrieve/index.ts`
-- [ ] T008 [P] Implement MCP `smoke_ping` schemas/descriptors from `ai-assistant-spec-hub/specs/001-platform-foundation/contracts/backend-mcp-capabilities.md` in `ai-assistant-contracts/src/mcp/index.ts`
-- [ ] T009 Export package barrel and `CONTRACT_PACKAGE_VERSION` constant in `ai-assistant-contracts/src/index.ts`; configure `ai-assistant-contracts/tsconfig.json` + package `exports`
-- [ ] T010 Add failing-then-passing schema tests in `ai-assistant-contracts/src/chat/chat.test.ts`, `ai-assistant-contracts/src/retrieve/retrieve.test.ts`, `ai-assistant-contracts/src/mcp/mcp.test.ts`
-- [ ] T011 Scaffold `ai-assistant-backend/package.json` (pnpm, TypeScript, Hono, Vitest, oxlint, Prettier, Zod) with scripts `dev`, `build`, `test`, `lint`, `typecheck`, `format`, `format:check` and dependency `"@ai-assistant/contracts": "file:../ai-assistant-contracts"`
-- [ ] T012 [P] Scaffold `ai-assistant-rag/package.json` with same baseline scripts/tooling and `"@ai-assistant/contracts": "file:../ai-assistant-contracts"`
-- [ ] T013 [P] Scaffold `ai-assistant-mcp/package.json` with same baseline scripts/tooling, `@modelcontextprotocol/sdk`, and `"@ai-assistant/contracts": "file:../ai-assistant-contracts"`
-- [ ] T014 Align `ai-assistant-ui/package.json` scripts to add `test`, `typecheck`, `format`, `format:check`; add Vitest + Prettier; add `"@ai-assistant/contracts": "file:../ai-assistant-contracts"`
-- [ ] T015 [P] Add shared tsconfig baselines: `ai-assistant-backend/tsconfig.json`, `ai-assistant-rag/tsconfig.json`, `ai-assistant-mcp/tsconfig.json`, `ai-assistant-contracts/tsconfig.json` (strict; NodeNext or bundler as appropriate)
-- [ ] T016 Document contracts install/version pin steps in `ai-assistant-contracts/README.md` per `ai-assistant-spec-hub/specs/001-platform-foundation/contracts/versioning.md`
+- [X] T005 Initialize `ai-assistant-contracts/package.json` as `@hazemgharib/ai-agent-contracts@0.1.0` with pnpm, TypeScript, Vitest, oxlint, Prettier, Zod; scripts `build`, `test`, `lint`, `typecheck`, `format`, `format:check`
+- [X] T006 Implement chat Zod schemas/types from `ai-assistant-spec-hub/specs/001-platform-foundation/contracts/ui-backend-chat.openapi.yaml` in `ai-assistant-contracts/src/chat/index.ts`
+- [X] T007 [P] Implement retrieve Zod schemas/types from `ai-assistant-spec-hub/specs/001-platform-foundation/contracts/backend-rag-retrieve.openapi.yaml` in `ai-assistant-contracts/src/retrieve/index.ts`
+- [X] T008 [P] Implement MCP `smoke_ping` schemas/descriptors from `ai-assistant-spec-hub/specs/001-platform-foundation/contracts/backend-mcp-capabilities.md` in `ai-assistant-contracts/src/mcp/index.ts`
+- [X] T009 Export package barrel and `CONTRACT_PACKAGE_VERSION` constant in `ai-assistant-contracts/src/index.ts`; configure `ai-assistant-contracts/tsconfig.json` + package `exports`
+- [X] T010 Add failing-then-passing schema tests in `ai-assistant-contracts/src/chat/chat.test.ts`, `ai-assistant-contracts/src/retrieve/retrieve.test.ts`, `ai-assistant-contracts/src/mcp/mcp.test.ts`
+- [X] T011 Scaffold `ai-assistant-backend/package.json` (pnpm, TypeScript, Hono, Vitest, oxlint, Prettier, Zod) with scripts `dev`, `build`, `test`, `lint`, `typecheck`, `format`, `format:check` and dependency `"@hazemgharib/ai-agent-contracts": "file:../ai-assistant-contracts"`
+- [X] T012 [P] Scaffold `ai-assistant-rag/package.json` with same baseline scripts/tooling and `"@hazemgharib/ai-agent-contracts": "file:../ai-assistant-contracts"`
+- [X] T013 [P] Scaffold `ai-assistant-mcp/package.json` with same baseline scripts/tooling, `@modelcontextprotocol/sdk`, and `"@hazemgharib/ai-agent-contracts": "file:../ai-assistant-contracts"`
+- [X] T014 Align `ai-assistant-ui/package.json` scripts to add `test`, `typecheck`, `format`, `format:check`; add Vitest + Prettier; add `"@hazemgharib/ai-agent-contracts": "file:../ai-assistant-contracts"`
+- [X] T015 [P] Add shared tsconfig baselines: `ai-assistant-backend/tsconfig.json`, `ai-assistant-rag/tsconfig.json`, `ai-assistant-mcp/tsconfig.json`, `ai-assistant-contracts/tsconfig.json` (strict; NodeNext or bundler as appropriate)
+- [X] T016 Document contracts install/version pin steps in `ai-assistant-contracts/README.md` per `ai-assistant-spec-hub/specs/001-platform-foundation/contracts/versioning.md`
 
-**Checkpoint**: `@ai-assistant/contracts` builds/tests; four runtime repos exist with tooling + file: dependency — story work can start
+**Checkpoint**: `@hazemgharib/ai-agent-contracts` builds/tests; four runtime repos exist with tooling + file: dependency — story work can start
 
 ---
 
@@ -79,14 +79,14 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-contracts/sr
 
 ### Implementation for User Story 1
 
-- [ ] T017 [US1] Write platform ownership map at `ai-assistant-spec-hub/overall-context/ownership.md` (table of repos, in/out of scope, inbound/outbound contracts, ports)
-- [ ] T018 [P] [US1] Add ownership section to `ai-assistant-ui/README.md` linking to `ownership.md` and stating UI non-ownership of agent/RAG/MCP
-- [ ] T019 [P] [US1] Add ownership section to `ai-assistant-backend/README.md` (orchestration owns; index/tool-server do not)
-- [ ] T020 [P] [US1] Add ownership section to `ai-assistant-rag/README.md`
-- [ ] T021 [P] [US1] Add ownership section to `ai-assistant-mcp/README.md`
-- [ ] T022 [P] [US1] Add ownership section to `ai-assistant-contracts/README.md` (schemas only; no runtime behavior)
-- [ ] T023 [US1] Add “Ownership” link from `ai-assistant-spec-hub/specs/001-platform-foundation/quickstart.md` to `overall-context/ownership.md`
-- [ ] T024 [US1] Add 5 sample change-request quiz answers appendix in `ai-assistant-spec-hub/overall-context/ownership.md` for SC-001 validation
+- [X] T017 [US1] Write platform ownership map at `ai-assistant-spec-hub/overall-context/ownership.md` (table of repos, in/out of scope, inbound/outbound contracts, ports)
+- [X] T018 [P] [US1] Add ownership section to `ai-assistant-ui/README.md` linking to `ownership.md` and stating UI non-ownership of agent/RAG/MCP
+- [X] T019 [P] [US1] Add ownership section to `ai-assistant-backend/README.md` (orchestration owns; index/tool-server do not)
+- [X] T020 [P] [US1] Add ownership section to `ai-assistant-rag/README.md`
+- [X] T021 [P] [US1] Add ownership section to `ai-assistant-mcp/README.md`
+- [X] T022 [P] [US1] Add ownership section to `ai-assistant-contracts/README.md` (schemas only; no runtime behavior)
+- [X] T023 [US1] Add “Ownership” link from `ai-assistant-spec-hub/specs/001-platform-foundation/quickstart.md` to `overall-context/ownership.md`
+- [X] T024 [US1] Add 5 sample change-request quiz answers appendix in `ai-assistant-spec-hub/overall-context/ownership.md` for SC-001 validation
 
 **Checkpoint**: Ownership map alone answers “which repo owns X?”
 
@@ -94,30 +94,30 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-contracts/sr
 
 ## Phase 4: User Story 4 - Integrate Only Through Explicit Contracts (Priority: P1)
 
-**Goal**: Providers implement and consumers use `@ai-assistant/contracts` only — no sibling `src` path imports
+**Goal**: Providers implement and consumers use `@hazemgharib/ai-agent-contracts` only — no sibling `src` path imports
 
 **Independent Test**: Audit finds zero internal cross-repo `src` imports; both sides use same package version (SC-004)
 
 ### Tests for User Story 4
 
-- [ ] T025 [P] [US4] Add contract validation unit tests for chat request/response parsing in `ai-assistant-backend/src/routes/chat.test.ts`
-- [ ] T026 [P] [US4] Add retrieve request validation tests in `ai-assistant-rag/src/routes/retrieve.test.ts`
-- [ ] T027 [P] [US4] Add `smoke_ping` input validation tests in `ai-assistant-mcp/src/tools/smokePing.test.ts`
+- [X] T025 [P] [US4] Add contract validation unit tests for chat request/response parsing in `ai-assistant-backend/src/routes/chat.test.ts`
+- [X] T026 [P] [US4] Add retrieve request validation tests in `ai-assistant-rag/src/routes/retrieve.test.ts`
+- [X] T027 [P] [US4] Add `smoke_ping` input validation tests in `ai-assistant-mcp/src/tools/smokePing.test.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T028 [US4] Implement RAG `GET /health` and `POST /v1/retrieve` with Zod from contracts in `ai-assistant-rag/src/server.ts` and `ai-assistant-rag/src/routes/retrieve.ts` (fixture chunks OK)
-- [ ] T029 [US4] Implement MCP server registering `smoke_ping` in `ai-assistant-mcp/src/server.ts` and `ai-assistant-mcp/src/tools/smokePing.ts` using contracts schemas
-- [ ] T030 [US4] Implement backend `GET /health` echoing `contractPackageVersion` in `ai-assistant-backend/src/server.ts`
-- [ ] T031 [US4] Implement `ai-assistant-backend/src/clients/ragClient.ts` calling RAG `/v1/retrieve` with contracts types; map failures to `UPSTREAM_UNAVAILABLE`
-- [ ] T032 [US4] Implement `ai-assistant-backend/src/clients/mcpClient.ts` invoking `smoke_ping`; map transport failures to `UPSTREAM_UNAVAILABLE`
-- [ ] T033 [US4] Implement `ai-assistant-backend/src/orchestration/stubOrchestrator.ts` deterministic routing to RAG and/or MCP for smoke flags/keywords
-- [ ] T034 [US4] Implement `POST /v1/chat` in `ai-assistant-backend/src/routes/chat.ts` returning `ChatResponse` with `diagnostics.hitRag` / `hitMcp` / `contractPackageVersion`
-- [ ] T035 [US4] Implement `ai-assistant-ui/src/adapters/httpBackendAdapter.ts` posting to `/v1/chat` using contracts types; select via `VITE_BACKEND_BASE_URL` in `ai-assistant-ui/src/components/RuntimeProvider.tsx`
-- [ ] T036 [US4] Keep isolated UI path via `ai-assistant-ui/src/adapters/localAgentAdapter.ts` when `VITE_BACKEND_BASE_URL` unset
-- [ ] T037 [US4] Add dependency audit note/script `ai-assistant-spec-hub/specs/001-platform-foundation/scripts/assert-no-src-path-deps.sh` (or doc checklist) verifying no `file:../**/src` consumer deps
+- [X] T028 [US4] Implement RAG `GET /health` and `POST /v1/retrieve` with Zod from contracts in `ai-assistant-rag/src/server.ts` and `ai-assistant-rag/src/routes/retrieve.ts` (fixture chunks OK)
+- [X] T029 [US4] Implement MCP server registering `smoke_ping` in `ai-assistant-mcp/src/server.ts` and `ai-assistant-mcp/src/tools/smokePing.ts` using contracts schemas
+- [X] T030 [US4] Implement backend `GET /health` echoing `contractPackageVersion` in `ai-assistant-backend/src/server.ts`
+- [X] T031 [US4] Implement `ai-assistant-backend/src/clients/ragClient.ts` calling RAG `/v1/retrieve` with contracts types; map failures to `UPSTREAM_UNAVAILABLE`
+- [X] T032 [US4] Implement `ai-assistant-backend/src/clients/mcpClient.ts` invoking `smoke_ping`; map transport failures to `UPSTREAM_UNAVAILABLE`
+- [X] T033 [US4] Implement `ai-assistant-backend/src/orchestration/stubOrchestrator.ts` deterministic routing to RAG and/or MCP for smoke flags/keywords
+- [X] T034 [US4] Implement `POST /v1/chat` in `ai-assistant-backend/src/routes/chat.ts` returning `ChatResponse` with `diagnostics.hitRag` / `hitMcp` / `contractPackageVersion`
+- [X] T035 [US4] Implement `ai-assistant-ui/src/adapters/httpBackendAdapter.ts` posting to `/v1/chat` using contracts types; select via `VITE_BACKEND_BASE_URL` in `ai-assistant-ui/src/components/RuntimeProvider.tsx`
+- [X] T036 [US4] Keep isolated UI path via `ai-assistant-ui/src/adapters/localAgentAdapter.ts` when `VITE_BACKEND_BASE_URL` unset
+- [X] T037 [US4] Add dependency audit note/script `ai-assistant-spec-hub/specs/001-platform-foundation/scripts/assert-no-src-path-deps.sh` (or doc checklist) verifying no `file:../**/src` consumer deps
 
-**Checkpoint**: All boundaries speak contracts package; providers/consumers typecheck against `@ai-assistant/contracts`
+**Checkpoint**: All boundaries speak contracts package; providers/consumers typecheck against `@hazemgharib/ai-agent-contracts`
 
 ---
 
@@ -129,16 +129,16 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-contracts/sr
 
 ### Tests for User Story 2
 
-- [ ] T038 [P] [US2] Ensure backend isolated suite uses MCP/RAG doubles (no live ports) in `ai-assistant-backend/src/orchestration/stubOrchestrator.test.ts`
-- [ ] T039 [P] [US2] Add UI adapter unit test for local stub path in `ai-assistant-ui/src/adapters/localAgentAdapter.test.ts`
-- [ ] T040 [P] [US2] Add RAG health/retrieve happy-path test without backend in `ai-assistant-rag/src/routes/retrieve.test.ts`
-- [ ] T041 [P] [US2] Add MCP tool test without backend in `ai-assistant-mcp/src/tools/smokePing.test.ts`
+- [X] T038 [P] [US2] Ensure backend isolated suite uses MCP/RAG doubles (no live ports) in `ai-assistant-backend/src/orchestration/stubOrchestrator.test.ts`
+- [X] T039 [P] [US2] Add UI adapter unit test for local stub path in `ai-assistant-ui/src/adapters/localAgentAdapter.test.ts`
+- [X] T040 [P] [US2] Add RAG health/retrieve happy-path test without backend in `ai-assistant-rag/src/routes/retrieve.test.ts`
+- [X] T041 [P] [US2] Add MCP tool test without backend in `ai-assistant-mcp/src/tools/smokePing.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T042 [US2] Wire backend isolated defaults: when `RAG_BASE_URL` / `MCP_SERVER_URL` unset, use in-process fakes in `ai-assistant-backend/src/clients/ragClient.ts` and `ai-assistant-backend/src/clients/mcpClient.ts`
-- [ ] T043 [P] [US2] Document isolated run steps in `ai-assistant-backend/README.md`, `ai-assistant-rag/README.md`, `ai-assistant-mcp/README.md`, `ai-assistant-ui/README.md`
-- [ ] T044 [US2] Verify each repo `pnpm install && pnpm test && pnpm lint && pnpm typecheck` succeeds from a clean directory without starting siblings; record commands in each README
+- [X] T042 [US2] Wire backend isolated defaults: when `RAG_BASE_URL` / `MCP_SERVER_URL` unset, use in-process fakes in `ai-assistant-backend/src/clients/ragClient.ts` and `ai-assistant-backend/src/clients/mcpClient.ts`
+- [X] T043 [P] [US2] Document isolated run steps in `ai-assistant-backend/README.md`, `ai-assistant-rag/README.md`, `ai-assistant-mcp/README.md`, `ai-assistant-ui/README.md`
+- [X] T044 [US2] Verify each repo `pnpm install && pnpm test && pnpm lint && pnpm typecheck` succeeds from a clean directory without starting siblings; record commands in each README
 
 **Checkpoint**: Four runtime repos + contracts independently green
 
@@ -152,15 +152,15 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-contracts/sr
 
 ### Tests for User Story 3
 
-- [ ] T045 [US3] Add optional smoke script `ai-assistant-backend/scripts/integrated-smoke.mjs` (or `.ts`) that POSTs `/v1/chat` with `smoke.requireRag` + `requireMcp` and asserts diagnostics (skips if env `SKIP_INTEGRATED_SMOKE=1`)
+- [X] T045 [US3] Add optional smoke script `ai-assistant-backend/scripts/integrated-smoke.mjs` (or `.ts`) that POSTs `/v1/chat` with `smoke.requireRag` + `requireMcp` and asserts diagnostics (skips if env `SKIP_INTEGRATED_SMOKE=1`)
 
 ### Implementation for User Story 3
 
-- [ ] T046 [US3] Ensure stub orchestrator honors `smoke.requireRag` / `requireMcp` in `ai-assistant-backend/src/orchestration/stubOrchestrator.ts` and `ai-assistant-backend/src/routes/chat.ts`
-- [ ] T047 [US3] Return clear `ErrorResponse` with `boundary` when RAG or MCP is down during integrated mode in `ai-assistant-backend/src/routes/chat.ts`
-- [ ] T048 [US3] Update `ai-assistant-spec-hub/specs/001-platform-foundation/quickstart.md` start-order, curl example, and pass criteria to match implemented ports/transports
-- [ ] T049 [US3] Add “Integrated smoke” section to `ai-assistant-backend/README.md` linking quickstart and listing required env vars
-- [ ] T050 [US3] Manually (or via T045) run integrated smoke with all five repos; capture pass note in `ai-assistant-spec-hub/specs/001-platform-foundation/checklists/smoke-log.md`
+- [X] T046 [US3] Ensure stub orchestrator honors `smoke.requireRag` / `requireMcp` in `ai-assistant-backend/src/orchestration/stubOrchestrator.ts` and `ai-assistant-backend/src/routes/chat.ts`
+- [X] T047 [US3] Return clear `ErrorResponse` with `boundary` when RAG or MCP is down during integrated mode in `ai-assistant-backend/src/routes/chat.ts`
+- [X] T048 [US3] Update `ai-assistant-spec-hub/specs/001-platform-foundation/quickstart.md` start-order, curl example, and pass criteria to match implemented ports/transports
+- [X] T049 [US3] Add “Integrated smoke” section to `ai-assistant-backend/README.md` linking quickstart and listing required env vars
+- [X] T050 [US3] Manually (or via T045) run integrated smoke with all five repos; capture pass note in `ai-assistant-spec-hub/specs/001-platform-foundation/checklists/smoke-log.md`
 
 **Checkpoint**: Integrated smoke green; isolated suites still pass when siblings are down
 
@@ -174,13 +174,13 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-contracts/sr
 
 ### Implementation for User Story 5
 
-- [ ] T051 [P] [US5] Add GitHub Actions workflow `ai-assistant-contracts/.github/workflows/ci.yml` (install → lint → typecheck → test → build)
-- [ ] T052 [P] [US5] Add `ai-assistant-backend/.github/workflows/ci.yml` with same baseline gates
-- [ ] T053 [P] [US5] Add `ai-assistant-rag/.github/workflows/ci.yml` with same baseline gates
-- [ ] T054 [P] [US5] Add `ai-assistant-mcp/.github/workflows/ci.yml` with same baseline gates
-- [ ] T055 [P] [US5] Add `ai-assistant-ui/.github/workflows/ci.yml` with same baseline gates
-- [ ] T056 [US5] Add platform conventions note `ai-assistant-spec-hub/overall-context/engineering-standards.md` (script names, oxlint, Prettier, Vitest, CI checklist)
-- [ ] T057 [US5] Link engineering standards from each runtime/contracts README
+- [X] T051 [P] [US5] Add GitHub Actions workflow `ai-assistant-contracts/.github/workflows/ci.yml` (install → lint → typecheck → test → build)
+- [X] T052 [P] [US5] Add `ai-assistant-backend/.github/workflows/ci.yml` with same baseline gates
+- [X] T053 [P] [US5] Add `ai-assistant-rag/.github/workflows/ci.yml` with same baseline gates
+- [X] T054 [P] [US5] Add `ai-assistant-mcp/.github/workflows/ci.yml` with same baseline gates
+- [X] T055 [P] [US5] Add `ai-assistant-ui/.github/workflows/ci.yml` with same baseline gates
+- [X] T056 [US5] Add platform conventions note `ai-assistant-spec-hub/overall-context/engineering-standards.md` (script names, oxlint, Prettier, Vitest, CI checklist)
+- [X] T057 [US5] Link engineering standards from each runtime/contracts README
 
 **Checkpoint**: CI configs exist; local scripts match documented standard
 
@@ -194,12 +194,12 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-contracts/sr
 
 ### Implementation for User Story 6
 
-- [ ] T058 [P] [US6] Create `ai-assistant-backend/.env.example` with `PORT`, `RAG_BASE_URL`, `MCP_SERVER_URL` (placeholders only)
-- [ ] T059 [P] [US6] Create `ai-assistant-rag/.env.example` with `PORT`
-- [ ] T060 [P] [US6] Create `ai-assistant-mcp/.env.example` with `PORT` / transport notes
-- [ ] T061 [P] [US6] Create `ai-assistant-ui/.env.example` with `VITE_BACKEND_BASE_URL`
-- [ ] T062 [US6] Document isolated vs integrated variable matrix in `ai-assistant-spec-hub/overall-context/ownership.md` or `engineering-standards.md` (match quickstart)
-- [ ] T063 [US6] Confirm `.gitignore` ignores `.env` in all runtime repos; run a quick secrets grep and note result in `ai-assistant-spec-hub/specs/001-platform-foundation/checklists/smoke-log.md`
+- [X] T058 [P] [US6] Create `ai-assistant-backend/.env.example` with `PORT`, `RAG_BASE_URL`, `MCP_SERVER_URL` (placeholders only)
+- [X] T059 [P] [US6] Create `ai-assistant-rag/.env.example` with `PORT`
+- [X] T060 [P] [US6] Create `ai-assistant-mcp/.env.example` with `PORT` / transport notes
+- [X] T061 [P] [US6] Create `ai-assistant-ui/.env.example` with `VITE_BACKEND_BASE_URL`
+- [X] T062 [US6] Document isolated vs integrated variable matrix in `ai-assistant-spec-hub/overall-context/ownership.md` or `engineering-standards.md` (match quickstart)
+- [X] T063 [US6] Confirm `.gitignore` ignores `.env` in all runtime repos; run a quick secrets grep and note result in `ai-assistant-spec-hub/specs/001-platform-foundation/checklists/smoke-log.md`
 
 **Checkpoint**: Env docs complete; no live credentials in git
 
@@ -209,12 +209,12 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-contracts/sr
 
 **Purpose**: Cross-repo consistency and quickstart validation
 
-- [ ] T064 [P] Align structured request logging (`boundary`, `contractPackageVersion`, `durationMs`) in `ai-assistant-backend/src/server.ts` (and thin logs in rag/mcp servers)
-- [ ] T065 [P] Ensure default ports 3001/3002/3003/5173 documented consistently across READMEs and `quickstart.md`
-- [ ] T066 Verify `$0` / no AWS / no inter-service auth statements in each README security/local section
-- [ ] T067 Run full `ai-assistant-spec-hub/specs/001-platform-foundation/quickstart.md` validation end-to-end and update any drift
-- [ ] T068 [P] Update `ai-assistant-spec-hub/overall-context/context.md` with a short pointer to ownership map + Phase 1 repos
-- [ ] T069 Final audit: consumers depend only on `@ai-assistant/contracts` package (not contracts `src` paths); fix any violations
+- [X] T064 [P] Align structured request logging (`boundary`, `contractPackageVersion`, `durationMs`) in `ai-assistant-backend/src/server.ts` (and thin logs in rag/mcp servers)
+- [X] T065 [P] Ensure default ports 3001/3002/3003/5173 documented consistently across READMEs and `quickstart.md`
+- [X] T066 Verify `$0` / no AWS / no inter-service auth statements in each README security/local section
+- [X] T067 Run full `ai-assistant-spec-hub/specs/001-platform-foundation/quickstart.md` validation end-to-end and update any drift
+- [X] T068 [P] Update `ai-assistant-spec-hub/overall-context/context.md` with a short pointer to ownership map + Phase 1 repos
+- [X] T069 Final audit: consumers depend only on `@hazemgharib/ai-agent-contracts` package (not contracts `src` paths); fix any violations
 
 ---
 

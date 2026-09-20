@@ -30,7 +30,7 @@ Phase 1 is primarily structural. Entities below model platform metadata and boun
 | ------- | ------ | -------- |
 | id | string | Stable id: `ui-backend-chat`, `backend-rag-retrieve`, `backend-mcp-capabilities` |
 | boundary | enum | `UI→backend` \| `backend→RAG` \| `backend→MCP` |
-| major.minor.patch | semver | Lives on `@ai-assistant/contracts` package version (shared package version for Phase 1) |
+| major.minor.patch | semver | Lives on `@hazemgharib/ai-agent-contracts` package version (shared package version for Phase 1) |
 | providerRepo | string | Canonical repo name |
 | consumerRepos | string[] | Canonical repo names |
 | errorModel | object | Required codes: `VALIDATION_ERROR`, `UPSTREAM_UNAVAILABLE`, `INTERNAL_ERROR` |
@@ -43,7 +43,7 @@ Phase 1 is primarily structural. Entities below model platform metadata and boun
 
 | Field | Type | Rules |
 | ------- | ------ | -------- |
-| name | string | `@ai-assistant/contracts` |
+| name | string | `@hazemgharib/ai-agent-contracts` |
 | version | semver | MAJOR bump on breaking schema/behavior of any boundary |
 | exports | module paths | `chat`, `retrieve`, `mcp` (+ root barrel) |
 

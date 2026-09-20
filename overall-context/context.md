@@ -1,5 +1,20 @@
 # AI Assistant Context
 
+## Phase 1 platform repos
+
+Sibling repositories under `ai-assistant/` (see [ownership.md](./ownership.md) and [engineering-standards.md](./engineering-standards.md)):
+
+| Repo | Role | Default port |
+| ------ | ------ | -------------- |
+| `ai-assistant-ui` | Chat UI | 5173 |
+| `ai-assistant-backend` | Orchestration | 3001 |
+| `ai-assistant-rag` | Retrieve stub | 3002 |
+| `ai-assistant-mcp` | MCP `smoke_ping` HTTP | 3003 |
+| `ai-assistant-contracts` | `@hazemgharib/ai-agent-contracts` | — |
+| `ai-assistant-spec-hub` | Specs / governance | — |
+
+Quickstart: [`../specs/001-platform-foundation/quickstart.md`](../specs/001-platform-foundation/quickstart.md).
+
 ## 1. Architecture Diagram
 
 ![Image](1.jpeg)
