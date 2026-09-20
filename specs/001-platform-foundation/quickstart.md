@@ -35,18 +35,18 @@ ai-assistant/
 
 ## Install contracts package (all runtime repos)
 
-Consumers depend on **`@hazemgharib/ai-agent-contracts@0.1.0`** from **GitHub Packages** (not a sibling `file:` checkout).
+Consumers depend on **`@hazemgharib/ai-agent-contracts@0.2.0`** from **GitHub Packages** (not a sibling `file:` checkout).
 
 ```bash
-# 1. Publish once from ai-assistant-contracts (tag v0.1.0 or workflow_dispatch)
+# 1. Package is published from ai-assistant-contracts (tag v0.2.0 or workflow_dispatch)
 # 2. Add auth to ~/.npmrc:  //npm.pkg.github.com/:_authToken=<PAT read:packages>
 # 3. In each runtime repo:
 pnpm install
 ```
 
-Local offline before publish: `pnpm build` in contracts, then link it into each consumer's `node_modules/@hazemgharib/ai-agent-contracts` (see contracts README).
+Local offline / pre-publish iteration: `pnpm build` in contracts, then link it into each consumer's `node_modules/@hazemgharib/ai-agent-contracts` (see contracts README).
 
-Pin/respect the package `version` field (start at `0.1.0`). See [contracts/versioning.md](./contracts/versioning.md).
+Pin/respect the package `version` field (current **`0.2.0`**; Phase 1 baseline was `0.1.0`). See [contracts/versioning.md](./contracts/versioning.md) and Phase 2 [versioning.md](../002-conversational-ui/contracts/versioning.md).
 
 ## Isolated mode (per repository)
 

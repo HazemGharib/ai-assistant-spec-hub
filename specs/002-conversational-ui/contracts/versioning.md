@@ -25,4 +25,4 @@ Phase 1 `ChatRequest` / `ChatResponse` / `POST /v1/chat` remain valid for compat
 
 ## Consumer pin
 
-`ai-assistant-ui` and `ai-assistant-backend` MUST pin `0.2.0` for Phase 2 integrated streaming + multi-conversation. Document upgrade in each README.
+`ai-assistant-ui`, `ai-assistant-backend`, `ai-assistant-rag`, and `ai-assistant-mcp` MUST pin `0.2.0` for Phase 2. Document upgrade in each README.
