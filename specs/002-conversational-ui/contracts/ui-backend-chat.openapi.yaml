@@ -1,0 +1,362 @@
+openapi: 3.1.0
+info:
+  title: UI ↔ Backend Chat Contract (Phase 2)
+  version: 0.2.0
+  description: |
+    Conversation boundary between ai-assistant-ui and ai-assistant-backend.
+    Extends Phase 1 `/v1/chat` with multi-conversation resources and SSE streaming.
+    Implemented in @hazemgharib/ai-agent-contracts ≥ 0.2.0. No auth in Phase 2 local mode.
+servers:
+  - url: http://127.0.0.1:3001
+    description: Local backend default
+paths:
+  /health:
+    get:
+      operationId: backendHealth
+      summary: Liveness for isolated smoke
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /v1/conversations:
+    get:
+      operationId: listConversations
+      summary: List backend-backed conversations
+      responses:
+        "200":
+          description: Conversation summaries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationListResponse"
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createConversation
+      summary: Create a new empty conversation
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateConversationRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/conversations/{conversationId}/messages:
+    get:
+      operationId: listMessages
+      summary: List messages for a conversation (reload / switch)
+      parameters:
+        - $ref: "#/components/parameters/ConversationId"
+      responses:
+        "200":
+          description: Chronological messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageListResponse"
+        "404":
+          description: Unknown conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/conversations/{conversationId}/messages:stream:
+    post:
+      operationId: streamMessage
+      summary: Send a user message and receive SSE assistant stream
+      parameters:
+        - $ref: "#/components/parameters/ConversationId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StreamMessageRequest"
+      responses:
+        "200":
+          description: SSE stream (see stream-events.md)
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: SSE frames with JSON data objects
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Unknown conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Upstream RAG/MCP unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/chat:
+    post:
+      operationId: postChat
+      summary: Phase 1 non-streaming chat (compatibility)
+      deprecated: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatRequest"
+      responses:
+        "200":
+          description: Assistant response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Upstream RAG/MCP unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  parameters:
+    ConversationId:
+      name: conversationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        contractPackageVersion:
+          type: string
+    Conversation:
+      type: object
+      required: [conversationId, createdAt, updatedAt]
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ConversationListResponse:
+      type: object
+      required: [conversations]
+      properties:
+        conversations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Conversation"
+    CreateConversationRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          nullable: true
+    StoredMessage:
+      type: object
+      required: [messageId, role, content, createdAt]
+      properties:
+        messageId:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        citations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Citation"
+    MessageListResponse:
+      type: object
+      required: [conversationId, messages]
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/StoredMessage"
+    StreamMessageRequest:
+      type: object
+      required: [message]
+      properties:
+        message:
+          $ref: "#/components/schemas/ChatMessage"
+        smoke:
+          $ref: "#/components/schemas/SmokeFlags"
+    ChatRequest:
+      type: object
+      required: [conversationId, message]
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+        message:
+          $ref: "#/components/schemas/ChatMessage"
+        smoke:
+          $ref: "#/components/schemas/SmokeFlags"
+    ChatMessage:
+      type: object
+      required: [messageId, role, content, createdAt]
+      properties:
+        messageId:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [user]
+        content:
+          type: string
+          minLength: 1
+        createdAt:
+          type: string
+          format: date-time
+    SmokeFlags:
+      type: object
+      properties:
+        requireRag:
+          type: boolean
+          default: false
+        requireMcp:
+          type: boolean
+          default: false
+    Citation:
+      type: object
+      required: [documentId, source]
+      properties:
+        documentId:
+          type: string
+        source:
+          type: string
+        title:
+          type: string
+          nullable: true
+        snippet:
+          type: string
+          nullable: true
+        chunkId:
+          type: string
+          nullable: true
+        url:
+          type: string
+          nullable: true
+          description: Display as plain text only in Phase 2 UI
+    ToolInvocationSummary:
+      type: object
+      required: [name, ok]
+      properties:
+        name:
+          type: string
+        ok:
+          type: boolean
+        detail:
+          type: string
+          nullable: true
+    ChatResponse:
+      type: object
+      required: [conversationId, message, diagnostics]
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+        message:
+          type: object
+          required: [messageId, role, content, createdAt]
+          properties:
+            messageId:
+              type: string
+              format: uuid
+            role:
+              type: string
+              enum: [assistant]
+            content:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+        citations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Citation"
+        toolInvocations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ToolInvocationSummary"
+        diagnostics:
+          type: object
+          required: [hitRag, hitMcp, contractPackageVersion]
+          properties:
+            hitRag:
+              type: boolean
+            hitMcp:
+              type: boolean
+            contractPackageVersion:
+              type: string
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [VALIDATION_ERROR, UPSTREAM_UNAVAILABLE, NOT_FOUND, INTERNAL_ERROR]
+        message:
+          type: string
+        boundary:
+          type: string
+          nullable: true
