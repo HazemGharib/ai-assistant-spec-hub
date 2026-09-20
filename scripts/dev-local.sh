@@ -28,6 +28,7 @@ BUILD_ONLY=0
 DO_SMOKE=0
 DO_INSTALL=0
 LOG_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)/.dev-logs"
+LOG_TAIL_LINES=80
 
 usage() {
   sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'
@@ -49,11 +50,69 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-log() { printf '==> %s\n' "$*"; }
-die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+ts() { date '+%H:%M:%S'; }
+log() { printf '[%s] ==> %s\n' "$(ts)" "$*"; }
+warn() { printf '[%s] WARN: %s\n' "$(ts)" "$*" >&2; }
+die() { printf '[%s] ERROR: %s\n' "$(ts)" "$*" >&2; exit 1; }
 
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || die "Missing required command: $1"
+}
+
+# Dump the last N lines of a log file to stderr with a clear header.
+dump_log() {
+  local label="$1"
+  local file="$2"
+  local lines="${3:-$LOG_TAIL_LINES}"
+
+  printf '\n---------- %s ----------\n' "$label" >&2
+  if [[ ! -f "$file" ]]; then
+    printf '(log file missing: %s)\n' "$file" >&2
+    return
+  fi
+  if [[ ! -s "$file" ]]; then
+    printf '(log file empty: %s)\n' "$file" >&2
+    return
+  fi
+  printf 'file: %s (last %s lines)\n\n' "$file" "$lines" >&2
+  tail -n "$lines" "$file" >&2 || true
+  printf '---------- end %s ----------\n\n' "$label" >&2
+}
+
+pid_alive() {
+  kill -0 "$1" 2>/dev/null
+}
+
+# Print status of any background services that have already exited.
+# Returns 0 if all still alive, 1 if any are dead.
+report_dead_services() {
+  local any_dead=0
+  local i name pid logfile
+  for i in "${!PIDS[@]}"; do
+    pid="${PIDS[$i]}"
+    name="${PID_NAMES[$i]:-pid-$pid}"
+    logfile="${PID_LOGS[$i]:-}"
+    if ! pid_alive "$pid"; then
+      any_dead=1
+      warn "Service '${name}' (pid ${pid}) is not running"
+      if [[ -n "$logfile" ]]; then
+        dump_log "run-${name}" "$logfile"
+      fi
+    fi
+  done
+  return "$any_dead"
+}
+
+find_service_index() {
+  local name="$1"
+  local i
+  for i in "${!PID_NAMES[@]}"; do
+    if [[ "${PID_NAMES[$i]}" == "$name" ]]; then
+      echo "$i"
+      return 0
+    fi
+  done
+  return 1
 }
 
 require_cmd pnpm
@@ -67,6 +126,9 @@ done
 mkdir -p "${LOG_DIR}"
 
 PIDS=()
+PID_NAMES=()
+PID_LOGS=()
+
 cleanup() {
   local pid
   if ((${#PIDS[@]})); then
@@ -92,20 +154,25 @@ run_in_repo() {
 
 install_all() {
   log "Installing dependencies in parallel..."
-  local repo pids=() status=0
+  local repo pids=() names=() status=0 i pid
   for repo in "${REPOS[@]}"; do
     (
       log "[install] ${repo}"
       run_in_repo "$repo" pnpm install
     ) >"${LOG_DIR}/install-${repo}.log" 2>&1 &
     pids+=($!)
+    names+=("$repo")
   done
-  for pid in "${pids[@]}"; do
-    wait "$pid" || status=1
+  for i in "${!pids[@]}"; do
+    pid="${pids[$i]}"
+    if ! wait "$pid"; then
+      status=1
+      warn "Install failed: ${names[$i]} (see ${LOG_DIR}/install-${names[$i]}.log)"
+      dump_log "install-${names[$i]}" "${LOG_DIR}/install-${names[$i]}.log"
+    fi
   done
   if ((status != 0)); then
-    log "Install failed — see ${LOG_DIR}/install-*.log"
-    exit 1
+    die "Install failed — failed repo logs dumped above (full set in ${LOG_DIR}/install-*.log)"
   fi
   log "Install complete"
 }
@@ -126,40 +193,56 @@ build_one() {
 
 build_all() {
   log "Building all repos in parallel..."
-  local repo pids=() status=0
+  local repo pids=() names=() status=0 i pid
   for repo in "${REPOS[@]}"; do
     (
       build_one "$repo"
     ) >"${LOG_DIR}/build-${repo}.log" 2>&1 &
     pids+=($!)
+    names+=("$repo")
   done
-  for pid in "${pids[@]}"; do
+  for i in "${!pids[@]}"; do
+    pid="${pids[$i]}"
     if ! wait "$pid"; then
       status=1
+      warn "Build failed: ${names[$i]} (see ${LOG_DIR}/build-${names[$i]}.log)"
+      dump_log "build-${names[$i]}" "${LOG_DIR}/build-${names[$i]}.log"
     fi
   done
   if ((status != 0)); then
-    log "Build failed — dumping logs:"
-    for repo in "${REPOS[@]}"; do
-      echo "----- ${repo} -----"
-      cat "${LOG_DIR}/build-${repo}.log" || true
-    done
-    exit 1
+    die "Build failed — failed repo logs dumped above (full set in ${LOG_DIR}/build-*.log)"
   fi
   log "Build complete"
 }
 
 wait_http() {
   local name="$1" url="$2" attempts="${3:-60}"
-  local i
+  local i logfile="${LOG_DIR}/run-${name}.log"
+  local curl_err="" curl_rc=0 idx pid
+
   for ((i = 1; i <= attempts; i++)); do
-    if curl -sf "$url" >/dev/null 2>&1; then
+    if idx="$(find_service_index "$name")"; then
+      pid="${PIDS[$idx]}"
+      if ! pid_alive "$pid"; then
+        dump_log "run-${name}" "$logfile"
+        die "${name} exited before becoming ready at ${url} (pid ${pid})"
+      fi
+    fi
+
+    curl_err="$(curl -sfS "$url" 2>&1)" && {
       log "${name} ready (${url})"
       return 0
-    fi
+    }
+    curl_rc=$?
+
     sleep 0.5
   done
-  die "${name} did not become ready at ${url} (see ${LOG_DIR}/)"
+
+  warn "${name} did not become ready at ${url} after ~$((attempts / 2))s"
+  warn "Last curl exit=${curl_rc}: ${curl_err:-'(no stderr)'}"
+  dump_log "run-${name}" "$logfile"
+  report_dead_services || true
+  die "${name} did not become ready at ${url}"
 }
 
 start_service() {
@@ -167,12 +250,15 @@ start_service() {
   local name="$2"
   shift 2
   local logfile="${LOG_DIR}/run-${name}.log"
+  : >"$logfile"
   log "Starting ${name} (${repo}) → ${logfile}"
   (
     cd "${ROOT}/${repo}"
     exec "$@"
   ) >"${logfile}" 2>&1 &
   PIDS+=($!)
+  PID_NAMES+=("$name")
+  PID_LOGS+=("$logfile")
 }
 
 start_stack() {
@@ -204,10 +290,10 @@ start_stack() {
           pnpm exec vite preview --host 127.0.0.1 --port "${PORT_UI}"
   fi
 
-  wait_http "RAG" "http://127.0.0.1:${PORT_RAG}/health"
-  wait_http "MCP" "http://127.0.0.1:${PORT_MCP}/health"
+  wait_http "rag" "http://127.0.0.1:${PORT_RAG}/health"
+  wait_http "mcp" "http://127.0.0.1:${PORT_MCP}/health"
   wait_http "backend" "http://127.0.0.1:${PORT_BACKEND}/health"
-  wait_http "UI" "http://127.0.0.1:${PORT_UI}"
+  wait_http "ui" "http://127.0.0.1:${PORT_UI}"
 
   cat <<EOF
 
@@ -224,14 +310,37 @@ EOF
 
 run_smoke() {
   log "Running integrated smoke..."
-  run_in_repo ai-assistant-backend \
+  if ! run_in_repo ai-assistant-backend \
     env BACKEND_BASE_URL="http://127.0.0.1:${PORT_BACKEND}" \
-        pnpm smoke:integrated
+        pnpm smoke:integrated; then
+    report_dead_services || true
+    die "Integrated smoke failed (services may still be running until exit)"
+  fi
   log "Integrated smoke passed"
+}
+
+# Poll running services; dump logs and exit if any die (bash 3.2 compatible).
+supervise_stack() {
+  local i pid name logfile
+  while true; do
+    sleep 1
+    for i in "${!PIDS[@]}"; do
+      pid="${PIDS[$i]}"
+      name="${PID_NAMES[$i]}"
+      logfile="${PID_LOGS[$i]}"
+      if ! pid_alive "$pid"; then
+        warn "Service '${name}' (pid ${pid}) exited"
+        dump_log "run-${name}" "$logfile"
+        report_dead_services || true
+        die "Local stack stopped because '${name}' exited"
+      fi
+    done
+  done
 }
 
 # --- main ---
 log "Workspace root: ${ROOT}"
+log "Logs directory: ${LOG_DIR}"
 
 if ((DO_INSTALL)); then
   install_all
@@ -253,5 +362,4 @@ if ((DO_SMOKE)); then
   run_smoke
 fi
 
-# Keep running until interrupted
-wait
+supervise_stack

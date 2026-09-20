@@ -38,10 +38,10 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-ui/src/App.t
 
 **Purpose**: Align package pins and env scaffolding for Phase 2 work without changing product behavior yet
 
-- [ ] T001 Bump `ai-assistant-contracts/package.json` version to `0.2.0` and note Phase 2 additive chat APIs in `ai-assistant-contracts/README.md` (link to `ai-assistant-spec-hub/specs/002-conversational-ui/contracts/`)
-- [ ] T002 [P] Pin `"@hazemgharib/ai-agent-contracts": "0.2.0"` (or documented `file:../ai-assistant-contracts`) in `ai-assistant-ui/package.json` and `ai-assistant-backend/package.json`
-- [ ] T003 [P] Add UI env examples for `VITE_BACKEND_BASE_URL` and `VITE_USE_MOCK_BACKEND` in `ai-assistant-ui/.env.example` (no secrets)
-- [ ] T004 [P] Create directory placeholders `ai-assistant-ui/src/adapters/mockBackend/.gitkeep`, `ai-assistant-ui/src/conversation/.gitkeep` per plan structure
+- [X] T001 Bump `ai-assistant-contracts/package.json` version to `0.2.0` and note Phase 2 additive chat APIs in `ai-assistant-contracts/README.md` (link to `ai-assistant-spec-hub/specs/002-conversational-ui/contracts/`)
+- [X] T002 [P] Pin `"@hazemgharib/ai-agent-contracts": "0.2.0"` (or documented `file:../ai-assistant-contracts`) in `ai-assistant-ui/package.json` and `ai-assistant-backend/package.json`
+- [X] T003 [P] Add UI env examples for `VITE_BACKEND_BASE_URL` and `VITE_USE_MOCK_BACKEND` in `ai-assistant-ui/.env.example` (no secrets)
+- [X] T004 [P] Create directory placeholders `ai-assistant-ui/src/adapters/mockBackend/.gitkeep`, `ai-assistant-ui/src/conversation/.gitkeep` per plan structure
 
 ---
 
@@ -51,12 +51,12 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-ui/src/App.t
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Extend citation + stream/conversation Zod schemas in `ai-assistant-contracts/src/chat/index.ts` from `ai-assistant-spec-hub/specs/002-conversational-ui/contracts/ui-backend-chat.openapi.yaml` and `stream-events.md` (`Conversation`, list/create, `StoredMessage`, `StreamEvent` union, `Citation.snippet`/`url`, `ActivityEvent`)
-- [ ] T006 Export new chat symbols and bump `CONTRACT_PACKAGE_VERSION` to `0.2.0` in `ai-assistant-contracts/src/index.ts`
-- [ ] T007 [P] Add failing-then-passing schema tests for conversations + stream events in `ai-assistant-contracts/src/chat/chat.test.ts`
-- [ ] T008 Build contracts package (`pnpm build` in `ai-assistant-contracts/`) and reinstall so `ai-assistant-ui` / `ai-assistant-backend` resolve `0.2.0` types
-- [ ] T009 Define shared backend-client interface types (list/create/getMessages/stream) in `ai-assistant-ui/src/adapters/backendClient.ts` using contracts package types only
-- [ ] T010 [P] Document stream event handling rules for implementers in `ai-assistant-ui/src/adapters/README.md` (pointer to spec-hub `contracts/stream-events.md`)
+- [X] T005 Extend citation + stream/conversation Zod schemas in `ai-assistant-contracts/src/chat/index.ts` from `ai-assistant-spec-hub/specs/002-conversational-ui/contracts/ui-backend-chat.openapi.yaml` and `stream-events.md` (`Conversation`, list/create, `StoredMessage`, `StreamEvent` union, `Citation.snippet`/`url`, `ActivityEvent`)
+- [X] T006 Export new chat symbols and bump `CONTRACT_PACKAGE_VERSION` to `0.2.0` in `ai-assistant-contracts/src/index.ts`
+- [X] T007 [P] Add failing-then-passing schema tests for conversations + stream events in `ai-assistant-contracts/src/chat/chat.test.ts`
+- [X] T008 Build contracts package (`pnpm build` in `ai-assistant-contracts/`) and reinstall so `ai-assistant-ui` / `ai-assistant-backend` resolve `0.2.0` types
+- [X] T009 Define shared backend-client interface types (list/create/getMessages/stream) in `ai-assistant-ui/src/adapters/backendClient.ts` using contracts package types only
+- [X] T010 [P] Document stream event handling rules for implementers in `ai-assistant-ui/src/adapters/README.md` (pointer to spec-hub `contracts/stream-events.md`)
 
 **Checkpoint**: Contracts `0.2.0` builds/tests; UI has a typed backend client interface — story work can start
 
@@ -72,18 +72,18 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-ui/src/App.t
 
 > Write these tests FIRST; ensure they FAIL before implementation
 
-- [ ] T011 [P] [US1] Add Vitest tests for SSE/mock stream deltas + loading/error in `ai-assistant-ui/src/adapters/mockBackend/mockBackend.stream.test.ts`
-- [ ] T012 [P] [US1] Add Vitest tests for single-slot queue + Stop discard behavior in `ai-assistant-ui/src/conversation/sendQueue.test.ts`
+- [X] T011 [P] [US1] Add Vitest tests for SSE/mock stream deltas + loading/error in `ai-assistant-ui/src/adapters/mockBackend/mockBackend.stream.test.ts`
+- [X] T012 [P] [US1] Add Vitest tests for single-slot queue + Stop discard behavior in `ai-assistant-ui/src/conversation/sendQueue.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Implement in-memory streamable mock (`create`, `streamMessage` with deltas/abort) in `ai-assistant-ui/src/adapters/mockBackend/store.ts` and `ai-assistant-ui/src/adapters/mockBackend/client.ts`
-- [ ] T014 [US1] Implement SSE HTTP stream consumer for `POST .../messages:stream` in `ai-assistant-ui/src/adapters/httpBackendAdapter.ts` (replace one-shot `/v1/chat` as primary path; honor `abortSignal`)
-- [ ] T015 [US1] Implement send-queue + Stop orchestration in `ai-assistant-ui/src/conversation/sendQueue.ts` and wire AbortController in `ai-assistant-ui/src/conversation/runtimeController.ts`
-- [ ] T016 [US1] Wire RuntimeProvider to select mock vs HTTP via env in `ai-assistant-ui/src/components/RuntimeProvider.tsx`
-- [ ] T017 [US1] Ensure Thread/composer shows loading and error states without clearing history in `ai-assistant-ui/src/components/Thread.tsx`
-- [ ] T018 [US1] Add Stop control UI wired to abort in `ai-assistant-ui/src/components/Thread.tsx` (or dedicated `ai-assistant-ui/src/components/StopButton.tsx`)
-- [ ] T019 [US1] Reject empty submits (no network) in composer path used by `ai-assistant-ui/src/components/Thread.tsx` / runtime controller
+- [X] T013 [US1] Implement in-memory streamable mock (`create`, `streamMessage` with deltas/abort) in `ai-assistant-ui/src/adapters/mockBackend/store.ts` and `ai-assistant-ui/src/adapters/mockBackend/client.ts`
+- [X] T014 [US1] Implement SSE HTTP stream consumer for `POST .../messages:stream` in `ai-assistant-ui/src/adapters/httpBackendAdapter.ts` (replace one-shot `/v1/chat` as primary path; honor `abortSignal`)
+- [X] T015 [US1] Implement send-queue + Stop orchestration in `ai-assistant-ui/src/conversation/sendQueue.ts` and wire AbortController in `ai-assistant-ui/src/conversation/runtimeController.ts`
+- [X] T016 [US1] Wire RuntimeProvider to select mock vs HTTP via env in `ai-assistant-ui/src/components/RuntimeProvider.tsx`
+- [X] T017 [US1] Ensure Thread/composer shows loading and error states without clearing history in `ai-assistant-ui/src/components/Thread.tsx`
+- [X] T018 [US1] Add Stop control UI wired to abort in `ai-assistant-ui/src/components/Thread.tsx` (or dedicated `ai-assistant-ui/src/components/StopButton.tsx`)
+- [X] T019 [US1] Reject empty submits (no network) in composer path used by `ai-assistant-ui/src/components/Thread.tsx` / runtime controller
 
 **Checkpoint**: US1 demo works in mock mode with stream, queue, Stop, and errors — MVP
 
@@ -97,20 +97,20 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-ui/src/App.t
 
 ### Tests for User Story 2
 
-- [ ] T020 [P] [US2] Add Vitest tests for list/create/switch without message bleed in `ai-assistant-ui/src/adapters/mockBackend/mockBackend.conversations.test.ts`
-- [ ] T021 [P] [US2] Add Vitest test for reload restore (re-list + re-fetch messages) in `ai-assistant-ui/src/conversation/reloadRestore.test.ts`
+- [X] T020 [P] [US2] Add Vitest tests for list/create/switch without message bleed in `ai-assistant-ui/src/adapters/mockBackend/mockBackend.conversations.test.ts`
+- [X] T021 [P] [US2] Add Vitest test for reload restore (re-list + re-fetch messages) in `ai-assistant-ui/src/conversation/reloadRestore.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T022 [US2] Extend mock store with persisted conversations + `list`/`create`/`getMessages` in `ai-assistant-ui/src/adapters/mockBackend/store.ts`
-- [ ] T023 [US2] Implement conversation state (active id, load messages, switch cancels stream + discards queue) in `ai-assistant-ui/src/conversation/conversationStore.ts`
-- [ ] T024 [US2] Build conversation list + create UI in `ai-assistant-ui/src/components/ConversationList.tsx`
-- [ ] T025 [US2] Integrate list + thread layout in `ai-assistant-ui/src/App.tsx` (minimalist: list secondary, thread primary)
-- [ ] T026 [US2] On switch/reload, hydrate assistant-ui thread from `getMessages` in `ai-assistant-ui/src/components/RuntimeProvider.tsx` / `conversationStore.ts`
-- [ ] T027 [US2] Implement backend in-memory conversation store in `ai-assistant-backend/src/store/conversations.ts`
-- [ ] T028 [P] [US2] Add `GET/POST /v1/conversations` and `GET /v1/conversations/:id/messages` in `ai-assistant-backend/src/routes/conversations.ts`
-- [ ] T029 [US2] Add stub SSE `POST /v1/conversations/:id/messages:stream` in `ai-assistant-backend/src/routes/stream.ts` and register routes in `ai-assistant-backend/src/server.ts`
-- [ ] T030 [US2] Extend HTTP client methods for list/create/getMessages in `ai-assistant-ui/src/adapters/httpBackendAdapter.ts` (or `backendClient.ts` HTTP impl)
+- [X] T022 [US2] Extend mock store with persisted conversations + `list`/`create`/`getMessages` in `ai-assistant-ui/src/adapters/mockBackend/store.ts`
+- [X] T023 [US2] Implement conversation state (active id, load messages, switch cancels stream + discards queue) in `ai-assistant-ui/src/conversation/conversationStore.ts`
+- [X] T024 [US2] Build conversation list + create UI in `ai-assistant-ui/src/components/ConversationList.tsx`
+- [X] T025 [US2] Integrate list + thread layout in `ai-assistant-ui/src/App.tsx` (minimalist: list secondary, thread primary)
+- [X] T026 [US2] On switch/reload, hydrate assistant-ui thread from `getMessages` in `ai-assistant-ui/src/components/RuntimeProvider.tsx` / `conversationStore.ts`
+- [X] T027 [US2] Implement backend in-memory conversation store in `ai-assistant-backend/src/store/conversations.ts`
+- [X] T028 [P] [US2] Add `GET/POST /v1/conversations` and `GET /v1/conversations/:id/messages` in `ai-assistant-backend/src/routes/conversations.ts`
+- [X] T029 [US2] Add stub SSE `POST /v1/conversations/:id/messages:stream` in `ai-assistant-backend/src/routes/stream.ts` and register routes in `ai-assistant-backend/src/server.ts`
+- [X] T030 [US2] Extend HTTP client methods for list/create/getMessages in `ai-assistant-ui/src/adapters/httpBackendAdapter.ts` (or `backendClient.ts` HTTP impl)
 
 **Checkpoint**: Multi-conversation + reload works against mock and stub backend
 
@@ -124,14 +124,14 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-ui/src/App.t
 
 ### Tests for User Story 5
 
-- [ ] T031 [P] [US5] Add dependency guard test/script asserting no RAG/MCP/LLM provider packages in `ai-assistant-ui/package.json` via `ai-assistant-ui/scripts/assert-ui-boundary.mjs` (or `ai-assistant-ui/src/boundary.assert.test.ts`)
+- [X] T031 [P] [US5] Add dependency guard test/script asserting no RAG/MCP/LLM provider packages in `ai-assistant-ui/package.json` via `ai-assistant-ui/scripts/assert-ui-boundary.mjs` (or `ai-assistant-ui/src/boundary.assert.test.ts`)
 
 ### Implementation for User Story 5
 
-- [ ] T032 [US5] Update `ai-assistant-ui/README.md` with mock vs integrated env, non-goals (no RAG/MCP/LLM), and test/dev commands
-- [ ] T033 [P] [US5] Update `ai-assistant-backend/README.md` with conversation + stream stub endpoints and ports
-- [ ] T034 [US5] Align `ai-assistant-spec-hub/specs/002-conversational-ui/quickstart.md` smoke checklist with actual scripts/env names
-- [ ] T035 [US5] Ensure CI in `ai-assistant-ui/.github/workflows/ci.yml` runs `test`, `lint`, `typecheck` (and boundary assert if added)
+- [X] T032 [US5] Update `ai-assistant-ui/README.md` with mock vs integrated env, non-goals (no RAG/MCP/LLM), and test/dev commands
+- [X] T033 [P] [US5] Update `ai-assistant-backend/README.md` with conversation + stream stub endpoints and ports
+- [X] T034 [US5] Align `ai-assistant-spec-hub/specs/002-conversational-ui/quickstart.md` smoke checklist with actual scripts/env names
+- [X] T035 [US5] Ensure CI in `ai-assistant-ui/.github/workflows/ci.yml` runs `test`, `lint`, `typecheck` (and boundary assert if added)
 
 **Checkpoint**: Contributor can follow README/quickstart for isolated + integrated verification
 
@@ -145,13 +145,13 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-ui/src/App.t
 
 ### Tests for User Story 3
 
-- [ ] T036 [P] [US3] Add Vitest tests for citation render / absent / plain-text URL in `ai-assistant-ui/src/components/CitationsPanel.test.tsx`
+- [X] T036 [P] [US3] Add Vitest tests for citation render / absent / plain-text URL in `ai-assistant-ui/src/components/CitationsPanel.test.tsx`
 
 ### Implementation for User Story 3
 
-- [ ] T037 [US3] Parse `citation` stream events and attach to assistant turn in `ai-assistant-ui/src/adapters/httpBackendAdapter.ts` and mock stream fixtures in `ai-assistant-ui/src/adapters/mockBackend/fixtures.ts`
-- [ ] T038 [US3] Implement display-only citations UI in `ai-assistant-ui/src/components/CitationsPanel.tsx` and mount from `ai-assistant-ui/src/components/Thread.tsx`
-- [ ] T039 [P] [US3] Optionally emit sample citation events from stub stream in `ai-assistant-backend/src/routes/stream.ts` for integrated demos
+- [X] T037 [US3] Parse `citation` stream events and attach to assistant turn in `ai-assistant-ui/src/adapters/httpBackendAdapter.ts` and mock stream fixtures in `ai-assistant-ui/src/adapters/mockBackend/fixtures.ts`
+- [X] T038 [US3] Implement display-only citations UI in `ai-assistant-ui/src/components/CitationsPanel.tsx` and mount from `ai-assistant-ui/src/components/Thread.tsx`
+- [X] T039 [P] [US3] Optionally emit sample citation events from stub stream in `ai-assistant-backend/src/routes/stream.ts` for integrated demos
 
 **Checkpoint**: Citations visible only when present; no navigation required
 
@@ -165,13 +165,13 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-ui/src/App.t
 
 ### Tests for User Story 4
 
-- [ ] T040 [P] [US4] Add Vitest tests for activity started/completed and ignore-malformed in `ai-assistant-ui/src/components/ActivityStatus.test.tsx`
+- [X] T040 [P] [US4] Add Vitest tests for activity started/completed and ignore-malformed in `ai-assistant-ui/src/components/ActivityStatus.test.tsx`
 
 ### Implementation for User Story 4
 
-- [ ] T041 [US4] Handle `activity` stream events in adapters (`ai-assistant-ui/src/adapters/httpBackendAdapter.ts`, `ai-assistant-ui/src/adapters/mockBackend/client.ts`)
-- [ ] T042 [US4] Implement generic activity status UI in `ai-assistant-ui/src/components/ActivityStatus.tsx` and show during in-flight turns in `ai-assistant-ui/src/components/Thread.tsx`
-- [ ] T043 [P] [US4] Optionally emit sample activity events from `ai-assistant-backend/src/routes/stream.ts`
+- [X] T041 [US4] Handle `activity` stream events in adapters (`ai-assistant-ui/src/adapters/httpBackendAdapter.ts`, `ai-assistant-ui/src/adapters/mockBackend/client.ts`)
+- [X] T042 [US4] Implement generic activity status UI in `ai-assistant-ui/src/components/ActivityStatus.tsx` and show during in-flight turns in `ai-assistant-ui/src/components/Thread.tsx`
+- [X] T043 [P] [US4] Optionally emit sample activity events from `ai-assistant-backend/src/routes/stream.ts`
 
 **Checkpoint**: Activity is contract-driven only; core chat works without events
 
@@ -181,12 +181,12 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-ui/src/App.t
 
 **Purpose**: Safety, docs consistency, and end-to-end validation across stories
 
-- [ ] T044 [P] Sanitize/render assistant, citation, and activity text safely (no raw HTML execution) in `ai-assistant-ui/src/components/CitationsPanel.tsx` and `ai-assistant-ui/src/components/ActivityStatus.tsx`
-- [ ] T045 [P] Retire or clearly demote legacy one-shot path messaging in `ai-assistant-ui/src/adapters/localAgentAdapter.ts` (point to mock/HTTP)
-- [ ] T046 Mark Phase 1 `POST /v1/chat` as compatibility-only in `ai-assistant-backend/src/routes/chat.ts` (keep working) and note deprecation in `ai-assistant-backend/README.md`
-- [ ] T047 Run full isolated gate: `pnpm test && pnpm lint && pnpm typecheck` in `ai-assistant-ui/` and `ai-assistant-contracts/`
-- [ ] T048 Run integrated smoke checklist from `ai-assistant-spec-hub/specs/002-conversational-ui/quickstart.md` (UI → backend only)
-- [ ] T049 [P] Sync OpenAPI copy if needed: ensure `ai-assistant-spec-hub/specs/002-conversational-ui/contracts/ui-backend-chat.openapi.yaml` matches shipped `0.2.0` schemas
+- [X] T044 [P] Sanitize/render assistant, citation, and activity text safely (no raw HTML execution) in `ai-assistant-ui/src/components/CitationsPanel.tsx` and `ai-assistant-ui/src/components/ActivityStatus.tsx`
+- [X] T045 [P] Retire or clearly demote legacy one-shot path messaging in `ai-assistant-ui/src/adapters/localAgentAdapter.ts` (point to mock/HTTP)
+- [X] T046 Mark Phase 1 `POST /v1/chat` as compatibility-only in `ai-assistant-backend/src/routes/chat.ts` (keep working) and note deprecation in `ai-assistant-backend/README.md`
+- [X] T047 Run full isolated gate: `pnpm test && pnpm lint && pnpm typecheck` in `ai-assistant-ui/` and `ai-assistant-contracts/`
+- [X] T048 Run integrated smoke checklist from `ai-assistant-spec-hub/specs/002-conversational-ui/quickstart.md` (UI → backend only)
+- [X] T049 [P] Sync OpenAPI copy if needed: ensure `ai-assistant-spec-hub/specs/002-conversational-ui/contracts/ui-backend-chat.openapi.yaml` matches shipped `0.2.0` schemas
 
 ---
 
