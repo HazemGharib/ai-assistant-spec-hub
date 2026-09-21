@@ -1,0 +1,125 @@
+openapi: 3.1.0
+info:
+  title: Backend ↔ RAG Retrieve Contract
+  version: 0.3.0
+  description: |
+    Retrieval boundary between ai-assistant-backend and ai-assistant-rag.
+    Phase 3 returns chunks from the real indexed corpus (post-ingest).
+    No auth (local trust model).
+servers:
+  - url: http://127.0.0.1:3002
+    description: Local RAG default
+paths:
+  /health:
+    get:
+      operationId: ragHealth
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    enum: [ok]
+  /v1/retrieve:
+    post:
+      operationId: retrieve
+      summary: Retrieve knowledge chunks for a query
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RetrieveRequest"
+      responses:
+        "200":
+          description: |
+            Retrieval result. `chunks` is empty only when the index has no
+            documents; otherwise up to `limit` results by descending score
+            (no minimum score floor).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetrieveResult"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Provider or internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    RetrieveRequest:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+          minLength: 1
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 5
+        conversationId:
+          type: string
+          format: uuid
+          nullable: true
+    RetrievedChunk:
+      type: object
+      required: [chunkId, documentId, version, text, source, score]
+      properties:
+        chunkId:
+          type: string
+        documentId:
+          type: string
+        version:
+          type: integer
+          minimum: 1
+        text:
+          type: string
+        source:
+          type: string
+        score:
+          type: number
+          minimum: 0
+          maximum: 1
+        title:
+          type: string
+          nullable: true
+        pageOrSection:
+          type: string
+          nullable: true
+    RetrieveResult:
+      type: object
+      required: [query, chunks]
+      properties:
+        query:
+          type: string
+        chunks:
+          type: array
+          items:
+            $ref: "#/components/schemas/RetrievedChunk"
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - PROVIDER_ERROR
+            - UPSTREAM_UNAVAILABLE
+            - INTERNAL_ERROR
+        message:
+          type: string
