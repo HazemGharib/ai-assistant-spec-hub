@@ -33,17 +33,18 @@ Default for `pnpm dev` MAY be `deterministic` for zero download friction; docume
 **Decision**: Internal `VectorStore` interface with:
 
 - `upsert(chunks)`, `deleteByDocumentId(documentId)`, `similaritySearch(vector, limit)` returning scored chunks with metadata
-- `MemoryVectorStore` for tests
-- `LocalJsonVectorStore` persisting under `DATA_DIR` (gitignored) for local demo durability across restarts
+- `MemoryVectorStore` for unit tests / CI isolation
+- `SqliteVecVectorStore` (**sqlite-vec** on a SQLite file under `DATA_DIR`, e.g. `./data/rag.sqlite`) as the durable local default for `pnpm dev`
 
-Future adapters (OpenSearch, pgvector) implement the same interface without contract changes.
+Embeddings remain caller-supplied via `EmbeddingProvider` (the store MUST NOT own embedding generation). Future adapters (OpenSearch, pgvector) implement the same interface without contract changes.
 
-**Rationale**: Spec FR-012; simplicity over managed vector DB (constitution IX). JSON + in-process cosine search is enough for ≤100–few-thousand chunks MVP.
+**Rationale**: Spec FR-012 and portability goals favor an explicit vector+metadata store that maps cleanly to OpenSearch/pgvector later. sqlite-vec keeps a single local file, $0 infra, and SQL-shaped filters/deletes without a separate database server. Constitution IX still satisfied (no managed vector DB / Docker OpenSearch for MVP).
 
 **Alternatives considered**:
 
-- SQLite/pgvector now — more ops surface than needed for Phase 3
-- Vectra / Chroma / LanceDB — viable; deferred to keep dependency count low; interface allows later swap
+- Local JSON + in-process cosine — simplest; deferred as durable default in favor of sqlite-vec for stronger portability semantics (retained only if needed as an emergency fallback, not planned)
+- Vectra / Chroma / LanceDB — viable; Chroma risks embedding-function coupling; LanceDB comparable but sqlite-vec preferred for SQL familiarity and OpenSearch/pgvector mental model
+- Postgres + pgvector now — heavier local ops than needed for Phase 3
 - OpenSearch locally via Docker — contradicts local-simple / zero-cost preference for MVP
 
 ---
@@ -77,18 +78,20 @@ Reject JSON bodies that include a `version` field. Also support a JSON alternati
 
 ## 4. Retrieve contract compatibility
 
-**Decision**: Keep `POST /v1/retrieve` path and existing request fields. **Add required `version: number` (positive int)** on each `RetrievedChunk` (MINOR bump with coordinated consumer update). Preserve `chunkId`, `documentId`, `text`, `source`, `score`, optional `title`, `pageOrSection`. Empty matches → `200` with `chunks: []`.
+**Decision**: Keep `POST /v1/retrieve` path and existing request fields. **Add required `version: number` (positive int)** on each `RetrievedChunk` (MINOR bump with coordinated consumer update). Preserve `chunkId`, `documentId`, `text`, `source`, `score`, optional `title`, `pageOrSection`.
+
+**Empty results**: `200` with `chunks: []` **only when the index has zero chunks**. When the index is non-empty, always return up to `limit` results ordered by descending score — **no minimum similarity floor** in this phase (unrelated queries may return low-scoring chunks).
 
 Bump package to **`0.3.0`**. Backend pins `0.3.0` and may ignore `version` in UI citation mapping until wired; field must be present on the wire.
 
-**Rationale**: Spec FR-006/020 and clarifications need version on citations; additive field with coordinated pin is MINOR under package versioning policy (all consumers upgrade together for integrated smoke).
+**Rationale**: Spec FR-006/020 and clarifications need version on citations; top-k-without-floor matches clarification (retrieve ranking session) and keeps agent-side filtering flexible.
 
 **Alternatives considered**:
 
 - Put version only on ingest response — insufficient for citation display at retrieve time
 - MAJOR break renaming retrieve — unnecessary
 - Keep fixture-only retrieve — fails FR-020
-
+- Minimum score cutoff → empty on unrelated queries — rejected in clarification (Option B)
 ---
 
 ## 5. Parsing, chunking, stable chunk IDs
@@ -164,3 +167,16 @@ Oversize → `VALIDATION_ERROR`. Unsupported media → `UNSUPPORTED_FORMAT`.
 **Decision**: Keep structured JSON logs on ingest/retrieve (`boundary`, `route`, `documentId`, `version`, `chunkCount`, `durationMs`, `contractPackageVersion`). Do not log full document bodies or secrets. Provider failures map to `PROVIDER_ERROR` without stack traces in responses.
 
 **Rationale**: Constitution IX local-first observability; security VIII untrusted content.
+
+---
+
+## 10. Retrieve ranking (top-k, no score floor)
+
+**Decision**: `similaritySearch` returns the top `limit` chunks by descending similarity/score. Do **not** apply a minimum score threshold in Phase 3. Normalize scores to 0..1 for the wire when practical. Empty `chunks` array iff the store has no indexed chunks.
+
+**Rationale**: Clarification Option B; avoids brittle thresholds with deterministic embeddings; agent/orchestrator may ignore low scores later.
+
+**Alternatives considered**:
+
+- Hard minimum score → empty on unrelated queries — rejected
+- Configurable threshold default-on — deferred; would be additive later via optional request field or config

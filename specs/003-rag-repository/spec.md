@@ -15,6 +15,14 @@
 - Q: How does document content reach the ingest API? → A: Content in request body (caller uploads Markdown/PDF bytes); source is metadata only
 - Q: Who assigns the document version number on ingest? → A: Server assigns and increments version automatically; caller does not send version
 
+### Session 2026-09-21 (local vector store)
+
+- Q: What durable local vector index should Phase 3 use? → A: SQLite with vector search (sqlite-vec) behind the VectorStore interface; in-memory store for unit tests; OpenSearch-class stores remain future adapters only
+
+### Session 2026-09-21 (retrieve ranking)
+
+- Q: When the index is non-empty but a query is unrelated, what should retrieve return? → A: Always return top-`limit` by score when the index has chunks; empty results only when the index is empty (no minimum score floor in this phase)
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Retrieve Relevant Chunks for the Agent (Priority: P1)
@@ -29,8 +37,9 @@ A backend/agent caller submits a natural-language query to the RAG service and r
 
 1. **Given** at least one indexed document containing known phrases, **When** the backend submits a query that matches that content, **Then** the service returns one or more chunks whose text relates to the query and each chunk includes document ID, source, page or section (when applicable), version, and chunk ID.
 2. **Given** an indexed corpus, **When** the backend submits a retrieve request with a result-limit preference, **Then** the service returns at most that many chunks, ordered from most to least relevant.
-3. **Given** a query that matches nothing in the index, **When** retrieve is called, **Then** the service returns an empty result set with a successful response (not an error).
-4. **Given** a malformed or incomplete retrieve request, **When** it is submitted, **Then** the service rejects it with a clear, contract-aligned error that does not expose internal provider details.
+3. **Given** an empty index (no indexed documents), **When** retrieve is called with any valid query, **Then** the service returns an empty result set with a successful response (not an error).
+4. **Given** a non-empty index and a query unrelated to indexed content, **When** retrieve is called, **Then** the service still returns up to the requested limit of highest-scoring chunks (scores may be low); it does not apply a minimum-score cutoff in this phase.
+5. **Given** a malformed or incomplete retrieve request, **When** it is submitted, **Then** the service rejects it with a clear, contract-aligned error that does not expose internal provider details.
 
 ---
 
@@ -106,6 +115,7 @@ A developer runs only the RAG repository locally, ingests sample documents, and 
 - Empty document body (valid format but no extractable text): ingest fails with `NO_CONTENT`; nothing is retrievable for that attempt; prior active version (if any) is unchanged.
 - Extremely large documents: service enforces a documented size/page limit; oversize inputs are rejected clearly rather than hanging or exhausting local resources unbounded.
 - Query with empty or whitespace-only text: rejected as invalid input.
+- Non-empty index + unrelated query: still returns top-`limit` chunks by score (no minimum-score filter); empty `chunks` only when the index itself is empty.
 - Concurrent ingest of the same document identity: service serializes or otherwise ensures one active version wins; no corrupt mixed-version index for that document.
 - Special characters, non-ASCII text, and Markdown structure (headings, code blocks): normalized such that retrieval remains useful and section metadata remains meaningful where structure is available.
 - PDF with scanned/image-only pages and no extractable text: treated as unreadable/no content with a clear failure or empty-content outcome (OCR is out of scope for this phase).
@@ -122,7 +132,7 @@ A developer runs only the RAG repository locally, ingests sample documents, and 
 - **FR-005**: The service MUST generate embeddings for chunks and store them in a searchable index so similarity-based retrieval is possible.
 - **FR-006**: Each indexed chunk MUST carry stable metadata including at least: document ID, source (origin identifier or URI/path as supplied), page or section locator when available, document version, and chunk ID.
 - **FR-007**: Chunk IDs MUST be stable for a given document version and chunk content/position policy such that identical re-processing of the same version yields the same chunk IDs.
-- **FR-008**: The service MUST expose a well-defined retrieve API that accepts a query from the backend/agent and returns relevant chunks with text, relevance ordering, metadata, and citation fields sufficient for downstream display.
+- **FR-008**: The service MUST expose a well-defined retrieve API that accepts a query from the backend/agent and returns relevant chunks with text, relevance ordering, metadata, and citation fields sufficient for downstream display. When the index contains at least one chunk, retrieve MUST return up to the requested limit ordered by descending score even if scores are low; an empty chunk list MUST occur only when the index is empty (no minimum similarity floor in this phase).
 - **FR-009**: The service MUST expose a well-defined ingest API (or equivalent documented operator entrypoint) that requires a caller-supplied document ID, accepts Markdown or PDF content as uploaded request bytes (not a server filesystem path), accepts source as citation metadata only, does not accept a caller-supplied version, and on success returns only after the new version is fully indexed and retrievable; the response MUST report success or failure, the same document ID, and the server-assigned version (no async job handoff in this phase).
 - **FR-010**: Retrieve and ingest contracts used by other repositories MUST live in the shared contracts package and remain the only cross-repo integration surface for RAG (no importing RAG internals).
 - **FR-011**: Embedding generation MUST be accessed through an internal provider boundary so the concrete embedding implementation can be replaced without changing ingest/retrieve consumer contracts.
@@ -171,12 +181,12 @@ A developer runs only the RAG repository locally, ingests sample documents, and 
 - Additional formats (HTML, DOCX, etc.) are out of scope for this phase but should not require consumer contract redesign when added later.
 - Chunking strategy (size/overlap) may be chosen by implementers for quality; stability of chunk IDs within a version is required regardless of strategy details.
 - Hybrid search, reranking, access-control filtering per user/tenant, and multi-tenant isolation are out of scope for this phase unless already implied by existing contracts (single local knowledge base).
-- AWS Bedrock embeddings and OpenSearch (or equivalents) are portability targets, not required implementations in this phase; local defaults satisfy DoD.
+- AWS Bedrock embeddings and OpenSearch (or equivalents) are portability targets, not required implementations in this phase; local durable index defaults to SQLite with vector search (sqlite-vec) under a local data directory, with an in-memory store for tests.
 - The shared contracts package will gain or extend ingest-related definitions as needed; retrieve remains backward-compatible with the Phase 1 backend client where practical, with a documented version bump if breaking changes are unavoidable.
 - Document identity MUST be caller-supplied on every ingest; the server does not assign document IDs. Version numbers are server-assigned (1, then N+1 on each successful re-ingest); callers do not supply version.
 - Ingest is synchronous for this phase: the caller blocks until indexing succeeds or the operation fails atomically; asynchronous ingest jobs are out of scope.
 - After successful re-ingest, superseded versions are dropped from the active index (no historical version retrieve in this phase).
-
+- Retrieve ranking uses top-`limit` by similarity score with no minimum-score cutoff in this phase; empty results only when the index has no chunks.
 ## Platform Constraints *(align with constitution)*
 
 - **Local-first**: Feature MUST be demonstrable locally without AWS provisioning
@@ -184,5 +194,5 @@ A developer runs only the RAG repository locally, ingests sample documents, and 
 - **Capability type**: RAG knowledge
 - **Authoritative data**: RAG supplies document context only; live/structured truths remain outside RAG (prefer API/DB when applicable)
 - **Security**: Treat retrieved chunk text as untrusted for answer authority; cite sources via metadata; no secrets in browser; provider credentials stay server-side in configuration
-- **Definition of Done**: Local TypeScript implementation in `ai-assistant-rag`, tests without paid cloud, error handling, documented deps, embedding/vector-store portability and security considered
+- **Definition of Done**: Local TypeScript implementation in `ai-assistant-rag`, tests without paid cloud, error handling, documented deps, embedding/vector-store portability (sqlite-vec local default) and security considered
 - **Ownership**: Ingestion, indexing, and retrieval owned solely by `ai-assistant-rag`; orchestration remains in `ai-assistant-backend`; cross-repo shapes owned by `ai-assistant-contracts`

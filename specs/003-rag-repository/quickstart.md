@@ -6,7 +6,7 @@ Local-first guide for real document ingest + retrieval in `ai-assistant-rag`. **
 
 - Sync ingest of **Markdown** and **PDF** bytes (`POST /v1/ingest`)
 - Retrieve grounded chunks with citation metadata including **version** (`POST /v1/retrieve`)
-- Embedding + vector store behind swappable providers (deterministic CI default; optional Transformers.js)
+- Embedding + vector store behind swappable providers (deterministic CI default; optional Transformers.js; **sqlite-vec** durable local index)
 - Contracts package **`@hazemgharib/ai-agent-contracts@0.3.0`**
 
 ## Prerequisites
@@ -40,10 +40,12 @@ cd ../ai-assistant-backend && pnpm install
 ```bash
 cd ai-assistant-rag
 pnpm install
-cp -n .env.example .env   # PORT=3002, DATA_DIR=./data, EMBEDDING_PROVIDER=deterministic
-pnpm test
-pnpm dev
+cp -n .env.example .env   # PORT=3002, DATA_DIR=./data, SQLITE_PATH=./data/rag.sqlite, VECTOR_STORE=sqlite, EMBEDDING_PROVIDER=deterministic
+pnpm test                 # uses VECTOR_STORE=memory (or temp sqlite) — no paid cloud
+pnpm dev                  # creates ./data/rag.sqlite on first ingest if missing
 ```
+
+First ingest creates the SQLite database under `DATA_DIR` (gitignored). CI MUST prefer `VECTOR_STORE=memory` or an ephemeral temp path so native sqlite-vec still runs offline without AWS.
 
 ### Health
 
@@ -79,6 +81,7 @@ curl -s -X POST http://127.0.0.1:3002/v1/retrieve \
 ```
 
 Expect chunks with `documentId`, `source`, `version`, `chunkId`, and optional `pageOrSection`.
+Against a non-empty index, unrelated queries still return up to `limit` chunks (scores may be low). Empty `chunks` only before any successful ingest (or after wiping the DB).
 
 ### Re-ingest (version bump)
 
@@ -99,6 +102,7 @@ First run may download a local model into the cache under `DATA_DIR` (gitignored
 |-------|--------|
 | Max upload | 5 MiB |
 | Formats | `text/markdown`, `application/pdf` |
+| Vector store (local) | sqlite-vec SQLite file (`VECTOR_STORE=sqlite`); `memory` for tests |
 | OCR | Not supported |
 | Auth | None (localhost trust) |
 

@@ -40,9 +40,9 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-rag/src/serv
 
 - [ ] T001 Bump `ai-assistant-contracts/package.json` version to `0.3.0` and note Phase 3 RAG ingest/retrieve changes in `ai-assistant-contracts/README.md` (link to `ai-assistant-spec-hub/specs/003-rag-repository/contracts/`)
 - [ ] T002 [P] Pin `"@hazemgharib/ai-agent-contracts": "0.3.0"` (or documented `file:../ai-assistant-contracts`) in `ai-assistant-rag/package.json` and `ai-assistant-backend/package.json`
-- [ ] T003 [P] Extend `ai-assistant-rag/.env.example` with `PORT`, `DATA_DIR`, `EMBEDDING_PROVIDER`, `MAX_UPLOAD_BYTES` (no secrets)
-- [ ] T004 [P] Create directory placeholders `ai-assistant-rag/src/pipeline/.gitkeep`, `ai-assistant-rag/src/providers/embedding/.gitkeep`, `ai-assistant-rag/src/providers/vector/.gitkeep`, `ai-assistant-rag/src/store/.gitkeep`, `ai-assistant-rag/fixtures/.gitkeep` and add `data/` to `ai-assistant-rag/.gitignore`
-- [ ] T005 [P] Add OSS PDF dependency (e.g. `pdf-parse`) to `ai-assistant-rag/package.json` for later pipeline use (do not wire routes yet)
+- [ ] T003 [P] Extend `ai-assistant-rag/.env.example` with `PORT`, `DATA_DIR`, `SQLITE_PATH` (default `$DATA_DIR/rag.sqlite`), `VECTOR_STORE` (`sqlite` \| `memory`), `EMBEDDING_PROVIDER`, `MAX_UPLOAD_BYTES` (no secrets)
+- [ ] T004 [P] Create directory placeholders `ai-assistant-rag/src/pipeline/.gitkeep`, `ai-assistant-rag/src/providers/embedding/.gitkeep`, `ai-assistant-rag/src/providers/vector/.gitkeep`, `ai-assistant-rag/src/store/.gitkeep`, `ai-assistant-rag/fixtures/.gitkeep` and add `data/` plus `*.sqlite` / `*.sqlite-*` to `ai-assistant-rag/.gitignore`
+- [ ] T005 [P] Add OSS PDF dependency (e.g. `pdf-parse`) plus **sqlite-vec** and SQLite driver (e.g. `better-sqlite3` + `@types/better-sqlite3`) to `ai-assistant-rag/package.json` (do not wire routes yet)
 
 ---
 
@@ -57,15 +57,15 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-rag/src/serv
 - [ ] T008 Export ingest + updated retrieve symbols and bump `CONTRACT_PACKAGE_VERSION` to `0.3.0` in `ai-assistant-contracts/src/index.ts`
 - [ ] T009 [P] Add schema tests for ingest + `RetrievedChunk.version` in `ai-assistant-contracts/src/ingest/ingest.test.ts` and `ai-assistant-contracts/src/retrieve/retrieve.test.ts` (or extend existing retrieve tests)
 - [ ] T010 Build contracts (`pnpm build` in `ai-assistant-contracts/`) and reinstall so `ai-assistant-rag` / `ai-assistant-backend` resolve `0.3.0` types
-- [ ] T011 Implement `ai-assistant-rag/src/config.ts` reading `PORT`, `DATA_DIR`, `EMBEDDING_PROVIDER` (`deterministic` default), `MAX_UPLOAD_BYTES` (default 5242880)
+- [ ] T011 Implement `ai-assistant-rag/src/config.ts` reading `PORT`, `DATA_DIR`, `SQLITE_PATH`, `VECTOR_STORE` (`sqlite` default for dev; `memory` for tests), `EMBEDDING_PROVIDER` (`deterministic` default), `MAX_UPLOAD_BYTES` (default 5242880)
 - [ ] T012 [P] Define `EmbeddingProvider` interface in `ai-assistant-rag/src/providers/embedding/types.ts`
 - [ ] T013 [P] Define `VectorStore` interface in `ai-assistant-rag/src/providers/vector/types.ts`
 - [ ] T014 Implement `DeterministicEmbeddingProvider` in `ai-assistant-rag/src/providers/embedding/deterministic.ts`
 - [ ] T015 [P] Implement `MemoryVectorStore` in `ai-assistant-rag/src/providers/vector/memory.ts`
-- [ ] T016 [P] Implement `LocalJsonVectorStore` in `ai-assistant-rag/src/providers/vector/localJson.ts` (persist under `DATA_DIR`)
-- [ ] T017 Implement `DocumentRegistry` in `ai-assistant-rag/src/store/documentRegistry.ts` (`documentId` → active version metadata; persist beside index)
+- [ ] T016 [P] Implement `SqliteVecVectorStore` in `ai-assistant-rag/src/providers/vector/sqliteVec.ts` (sqlite-vec; DB path from `SQLITE_PATH` / `DATA_DIR`; store MUST NOT own embedding generation)
+- [ ] T017 Implement `DocumentRegistry` in `ai-assistant-rag/src/store/documentRegistry.ts` (`documentId` → active version metadata; prefer same SQLite DB as vectors)
 - [ ] T018 Wire provider factory (select embedding + vector store from config) in `ai-assistant-rag/src/providers/createProviders.ts`
-- [ ] T019 [P] Add unit tests for deterministic embed + memory vector similarity in `ai-assistant-rag/src/providers/embedding/deterministic.test.ts` and `ai-assistant-rag/src/providers/vector/memory.test.ts`
+- [ ] T019 [P] Add unit tests for deterministic embed + memory vector similarity in `ai-assistant-rag/src/providers/embedding/deterministic.test.ts` and `ai-assistant-rag/src/providers/vector/memory.test.ts`; add sqlite-vec smoke against a temp DB in `ai-assistant-rag/src/providers/vector/sqliteVec.test.ts`
 
 **Checkpoint**: Contracts `0.3.0` builds; RAG has config + provider interfaces + registry — story work can start
 
@@ -73,20 +73,20 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-rag/src/serv
 
 ## Phase 3: User Story 1 - Retrieve Relevant Chunks (Priority: P1) 🎯 MVP
 
-**Goal**: Backend/agent can `POST /v1/retrieve` and get ranked chunks with `documentId`, `source`, `version`, `chunkId`, optional `pageOrSection` from a real index (not hard-coded fixture-only behavior)
+**Goal**: Backend/agent can `POST /v1/retrieve` and get ranked chunks with `documentId`, `source`, `version`, `chunkId`, optional `pageOrSection` from a real index (not hard-coded fixture-only behavior). Top-`limit` by score with **no minimum score floor**; `chunks: []` only when the index is empty.
 
-**Independent Test**: Seed a small corpus via test helper into `MemoryVectorStore` + registry; call retrieve; assert citation fields and empty-query / no-match / limit behavior
+**Independent Test**: Seed a small corpus via test helper into `MemoryVectorStore` + registry; call retrieve; assert citation fields, limit ordering, empty-index → `chunks: []`, and non-empty index + unrelated query still returns top-`limit`
 
 ### Tests for User Story 1
 
 > Write these tests FIRST; ensure they FAIL before implementation
 
-- [ ] T020 [P] [US1] Add retrieve contract/route tests (seeded index, empty matches, validation, limit) in `ai-assistant-rag/src/routes/retrieve.test.ts`
-- [ ] T021 [P] [US1] Add retrieve service unit tests for score ordering + metadata mapping in `ai-assistant-rag/src/pipeline/retrieve.test.ts` (or `src/services/retrieve.test.ts`)
+- [ ] T020 [P] [US1] Add retrieve contract/route tests (seeded index, empty index → [], unrelated query still returns top-k, validation, limit) in `ai-assistant-rag/src/routes/retrieve.test.ts`
+- [ ] T021 [P] [US1] Add retrieve service unit tests for score ordering + metadata mapping in `ai-assistant-rag/src/pipeline/retrieve.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T022 [US1] Implement retrieve orchestration (embed query → vector search → map `RetrievedChunk` including `version`) in `ai-assistant-rag/src/pipeline/retrieve.ts`
+- [ ] T022 [US1] Implement retrieve orchestration (embed query → vector search top-`limit` with no score floor → map `RetrievedChunk` including `version`; empty only if index empty) in `ai-assistant-rag/src/pipeline/retrieve.ts`
 - [ ] T023 [US1] Replace fixture-only handler with real retrieve in `ai-assistant-rag/src/routes/retrieve.ts` using providers from `createProviders.ts`
 - [ ] T024 [US1] Ensure `/health` still works and structured logs include `boundary`, `route`, `chunkCount`, `durationMs`, `contractPackageVersion` in `ai-assistant-rag/src/routes/retrieve.ts` / `ai-assistant-rag/src/server.ts`
 - [ ] T025 [US1] Add test-only seed helper for pre-indexed chunks in `ai-assistant-rag/src/test/seedIndex.ts` used by retrieve tests
@@ -104,7 +104,7 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-rag/src/serv
 
 ### Tests for User Story 2
 
-- [ ] T027 [P] [US2] Add ingest route tests (MD success, validation, unsupported format, NO_CONTENT) in `ai-assistant-rag/src/routes/ingest.test.ts`
+- [ ] T027 [P] [US2] Add ingest route tests (MD success, validation, unsupported format, NO_CONTENT, forbidden `version` field) in `ai-assistant-rag/src/routes/ingest.test.ts`
 - [ ] T028 [P] [US2] Add parse/normalize/chunk unit tests in `ai-assistant-rag/src/pipeline/parseMarkdown.test.ts`, `ai-assistant-rag/src/pipeline/parsePdf.test.ts`, `ai-assistant-rag/src/pipeline/chunk.test.ts`
 
 ### Implementation for User Story 2
@@ -149,11 +149,11 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-rag/src/serv
 
 **Goal**: Alternate embedding or vector implementations selectable via config; same ingest/retrieve contracts
 
-**Independent Test**: Run same ingest+retrieve suite with provider A vs B (deterministic+memory vs deterministic+localJson, and/or fake second embedding); assert identical response shapes
+**Independent Test**: Run same ingest+retrieve suite with deterministic+memory vs deterministic+sqlite-vec (and/or alternate embedding stub); assert identical response shapes
 
 ### Tests for User Story 4
 
-- [ ] T044 [P] [US4] Add provider-swap contract shape test (two VectorStore impls) in `ai-assistant-rag/src/providers/providerSwap.test.ts`
+- [ ] T044 [P] [US4] Add provider-swap contract shape test (MemoryVectorStore vs SqliteVecVectorStore) in `ai-assistant-rag/src/providers/providerSwap.test.ts`
 - [ ] T045 [P] [US4] Add provider failure mapping test (`PROVIDER_ERROR`, no secrets/stacks in body) in `ai-assistant-rag/src/routes/providerErrors.test.ts`
 
 ### Implementation for User Story 4
@@ -161,7 +161,7 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-rag/src/serv
 - [ ] T046 [US4] Implement optional `TransformersJsEmbeddingProvider` in `ai-assistant-rag/src/providers/embedding/transformers.ts` behind `EMBEDDING_PROVIDER=transformers` (lazy import; document as optional)
 - [ ] T047 [US4] Ensure `createProviders.ts` selects embedding/vector by env without changing route handlers in `ai-assistant-rag/src/routes/ingest.ts` / `retrieve.ts`
 - [ ] T048 [US4] Add a second lightweight embedding stub (e.g. alternate hash seed) `ai-assistant-rag/src/providers/embedding/deterministicAlt.ts` for swap tests only if transformers too heavy for CI
-- [ ] T049 [US4] Document provider swap and portability targets in `ai-assistant-rag/README.md` (pointer to Bedrock/OpenSearch as future adapters only)
+- [ ] T049 [US4] Document provider swap and portability targets (sqlite-vec local → Bedrock/OpenSearch later) in `ai-assistant-rag/README.md`
 
 **Checkpoint**: Consumers unchanged when providers swap; CI remains deterministic/offline
 
@@ -175,13 +175,13 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-rag/src/serv
 
 ### Tests for User Story 5
 
-- [ ] T050 [P] [US5] Add smoke script or documented curl checklist validation helper `ai-assistant-rag/scripts/smoke-ingest-retrieve.mjs` (optional; or Vitest smoke using app fetch)
+- [ ] T050 [P] [US5] Add smoke script or documented curl checklist helper `ai-assistant-rag/scripts/smoke-ingest-retrieve.mjs` (optional; or Vitest smoke using app fetch)
 
 ### Implementation for User Story 5
 
-- [ ] T051 [US5] Update `ai-assistant-rag/README.md` with isolated setup, limits (5 MiB), formats, OCR out of scope, and link to `ai-assistant-spec-hub/specs/003-rag-repository/quickstart.md`
+- [ ] T051 [US5] Update `ai-assistant-rag/README.md` with isolated setup, limits (5 MiB), formats, OCR out of scope, sqlite-vec path, top-k retrieve notes, and link to `ai-assistant-spec-hub/specs/003-rag-repository/quickstart.md`
 - [ ] T052 [US5] Align `ai-assistant-spec-hub/specs/003-rag-repository/quickstart.md` with final env var names and example commands
-- [ ] T053 [US5] Verify CI workflow `ai-assistant-rag/.github/workflows/ci.yml` runs `pnpm test` / lint / typecheck with `EMBEDDING_PROVIDER=deterministic` and no paid secrets
+- [ ] T053 [US5] Verify CI workflow `ai-assistant-rag/.github/workflows/ci.yml` runs `pnpm test` / lint / typecheck with `EMBEDDING_PROVIDER=deterministic` and `VECTOR_STORE=memory` (or temp sqlite), no paid secrets
 - [ ] T054 [US5] Confirm backend still fakes RAG when `RAG_BASE_URL` unset in `ai-assistant-backend/src/clients/ragClient.ts` (isolated backend suite green)
 
 **Checkpoint**: RAG-only local demo + CI satisfy SC-004/SC-006
@@ -195,7 +195,7 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-rag/src/serv
 - [ ] T055 [P] Add SC-001 probe evaluation test (≥90% of `fixtures/probes.json` hit expected passages) in `ai-assistant-rag/src/evaluation/probes.test.ts`
 - [ ] T056 [P] Review structured logging for ingest (no full bodies/secrets) in `ai-assistant-rag/src/routes/ingest.ts`
 - [ ] T057 Security pass: confirm retrieved text treated as untrusted at boundary; error responses omit stacks in `ai-assistant-rag/src/routes/*.ts`
-- [ ] T058 Run full quickstart validation (ingest MD+PDF, re-ingest, retrieve) against `pnpm dev` and record any doc fixes in `ai-assistant-rag/README.md`
+- [ ] T058 Run full quickstart validation (ingest MD+PDF, re-ingest, retrieve top-k / empty-index) against `pnpm dev` and record any doc fixes in `ai-assistant-rag/README.md`
 - [ ] T059 [P] Copy/sync final OpenAPI from implementation notes back to `ai-assistant-spec-hub/specs/003-rag-repository/contracts/` if wire details drifted
 - [ ] T060 Ensure `ai-assistant-backend/package.json` remains on contracts `0.3.0` and `pnpm typecheck` passes after `RetrievedChunk.version`
 
@@ -208,7 +208,7 @@ Paths below are relative to that workspace root (e.g. `ai-assistant-rag/src/serv
 - **Setup (Phase 1)**: No dependencies — start immediately
 - **Foundational (Phase 2)**: Depends on Setup — **BLOCKS** all user stories
 - **US1 (Phase 3)**: After Foundational — MVP retrieve from seeded index
-- **US2 (Phase 4)**: After Foundational; practically after US1 retrieve wiring (ingest feeds the same index) — can start parsers in parallel with US1 once providers exist
+- **US2 (Phase 4)**: After Foundational; practically after US1 retrieve wiring (ingest feeds the same index) — parsers can start in parallel with US1 once providers exist
 - **US3 (Phase 5)**: Depends on US2 ingest orchestration
 - **US4 (Phase 6)**: Depends on Foundational providers; best after US2 so swap tests cover ingest+retrieve
 - **US5 (Phase 7)**: After US2 (docs/smoke); can overlap polish
@@ -224,10 +224,10 @@ Phase 2 Foundational
         └── US5 Isolation docs/CI (after US2)
 ```
 
-- **US1**: No dependency on ingest HTTP — uses seed helper
+- **US1**: No dependency on ingest HTTP — uses seed helper; top-k / empty-index rules apply
 - **US2**: Uses same VectorStore/registry as US1
 - **US3**: Extends US2 `ingestDocument`
-- **US4**: Config/provider factory; contract shapes stable
+- **US4**: Config/provider factory; Memory vs sqlite-vec
 - **US5**: Documentation + CI verification
 
 ### Parallel Opportunities
@@ -242,26 +242,22 @@ Phase 2 Foundational
 
 ---
 
-## Parallel Example: User Story 2
-
-```bash
-# Tests in parallel:
-Task: "Add ingest route tests in ai-assistant-rag/src/routes/ingest.test.ts"
-Task: "Add parse/chunk unit tests in ai-assistant-rag/src/pipeline/*.test.ts"
-
-# Parsers in parallel after foundational providers:
-Task: "Implement parseMarkdown.ts"
-Task: "Implement parsePdf.ts"
-Task: "Implement normalize.ts"
-```
-
----
-
 ## Parallel Example: User Story 1
 
 ```bash
 Task: "Add retrieve route tests in ai-assistant-rag/src/routes/retrieve.test.ts"
 Task: "Add retrieve pipeline tests in ai-assistant-rag/src/pipeline/retrieve.test.ts"
+```
+
+---
+
+## Parallel Example: User Story 2
+
+```bash
+Task: "Add ingest route tests in ai-assistant-rag/src/routes/ingest.test.ts"
+Task: "Implement parseMarkdown.ts"
+Task: "Implement parsePdf.ts"
+Task: "Implement normalize.ts"
 ```
 
 ---
@@ -272,7 +268,7 @@ Task: "Add retrieve pipeline tests in ai-assistant-rag/src/pipeline/retrieve.tes
 
 1. Complete Phase 1: Setup
 2. Complete Phase 2: Foundational (CRITICAL)
-3. Complete Phase 3: US1 Retrieve (seeded index)
+3. Complete Phase 3: US1 Retrieve (seeded index, top-k semantics)
 4. **STOP and VALIDATE**: Retrieve citations from seeded corpus
 5. Demo MVP retrieve path
 
@@ -280,9 +276,9 @@ Task: "Add retrieve pipeline tests in ai-assistant-rag/src/pipeline/retrieve.tes
 
 1. Setup + Foundational → providers + contracts ready
 2. US1 → retrieve MVP
-3. US2 → real ingest MD/PDF
+3. US2 → real ingest MD/PDF into sqlite-vec
 4. US3 → safe versioning
-5. US4 → provider portability proof
+5. US4 → provider portability proof (memory ↔ sqlite-vec)
 6. US5 + Polish → isolated DoD / probes / docs
 
 ### Parallel Team Strategy
@@ -300,7 +296,9 @@ Task: "Add retrieve pipeline tests in ai-assistant-rag/src/pipeline/retrieve.tes
 
 - [P] = different files, no unmet dependencies
 - [Story] labels US1–US5 only on story-phase tasks
+- Durable local vector store: **sqlite-vec** (`SqliteVecVectorStore`); tests/CI prefer `VECTOR_STORE=memory`
+- Retrieve: top-`limit` by score, **no min score floor**; empty `chunks` only if index empty
 - CI MUST use `EMBEDDING_PROVIDER=deterministic` (no model download)
-- Do not commit `ai-assistant-rag/data/` or secrets
+- Do not commit `ai-assistant-rag/data/` or `*.sqlite` or secrets
 - Prefer failing tests before implementation for story test tasks
 - Suggested MVP scope: **US1** (seeded retrieve); product-useful MVP: **US1 + US2**

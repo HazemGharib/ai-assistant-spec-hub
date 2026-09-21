@@ -37,7 +37,10 @@ paths:
               $ref: "#/components/schemas/RetrieveRequest"
       responses:
         "200":
-          description: Retrieval result (may be empty chunks)
+          description: |
+            Retrieval result. `chunks` is empty only when the index has no
+            documents; otherwise up to `limit` results by descending score
+            (no minimum score floor).
           content:
             application/json:
               schema:

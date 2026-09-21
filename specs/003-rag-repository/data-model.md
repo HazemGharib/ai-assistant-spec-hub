@@ -4,7 +4,7 @@
 **Date**: 2026-09-21  
 **Source of truth for wire shapes**: `@hazemgharib/ai-agent-contracts` ≥ `0.3.0` (see `contracts/`)
 
-Internal persistence lives only in `ai-assistant-rag` (`DocumentRegistry` + `VectorStore`). Consumers see ingest/retrieve DTOs only.
+Internal persistence lives only in `ai-assistant-rag` (`DocumentRegistry` + `VectorStore`). Durable default is a **SQLite** database under `DATA_DIR` (sqlite-vec for vectors; registry tables co-located or sibling). Unit tests use an in-memory `VectorStore`. Consumers see ingest/retrieve DTOs only.
 
 ---
 
@@ -87,6 +87,8 @@ active(vN) --ingest fail--> active(vN) unchanged
 | `limit` | integer | Optional; default 5; min 1; max 20 |
 | `conversationId` | UUID \| null | Optional; unused by RAG ranking in this phase (pass-through / ignored) |
 
+**Ranking rules**: Return up to `limit` chunks ordered by descending `score`. No minimum-score filter. `chunks: []` only when the index contains zero chunks. Unrelated queries against a non-empty index still return top-`limit` (possibly low scores).
+
 ---
 
 ### IngestRequest (domain / wire)
@@ -127,6 +129,7 @@ active(vN) --ingest fail--> active(vN) unchanged
 - `deleteByDocumentId(documentId: string): Promise<void>`
 - `similaritySearch(queryEmbedding: number[], limit: number): Promise<Array<Chunk & { score: number }>>`
 - Implementations MUST NOT leak into contracts package
+- Durable local implementation: **SqliteVecVectorStore** (sqlite-vec); tests: **MemoryVectorStore**
 
 ---
 

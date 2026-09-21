@@ -31,13 +31,8 @@
 
 ## Validation Notes
 
-**Iteration 1 (2026-09-21)**: All items passed.
-
-- Content stays at capability level (ingest, retrieve, metadata, provider boundaries). Concrete stacks appear only in constitution-aligned Platform Constraints / DoD (local TypeScript repo ownership), not in user stories or success metrics.
-- Portability targets (e.g., Bedrock/OpenSearch-class services) are framed as future replaceability assumptions, not required implementations.
-- No clarification markers; defaults recorded under Assumptions (OCR out of scope, UI does not call RAG, local trust model, formats limited to Markdown/PDF).
-- Success criteria use measurable probes, timing, CI, and versioning outcomes without prescribing libraries.
+**Iteration 2 (2026-09-21)**: Clarified durable local vector store = sqlite-vec (recorded in Clarifications + Assumptions). User stories / FRs / success criteria remain technology-agnostic; concrete sqlite-vec choice lives in plan/research/tasks/quickstart.
 
 ## Notes
 
-- Spec is ready for `/speckit.clarify` (optional) or `/speckit.plan`.
+- Spec remains ready for implementation via existing `plan.md` / `tasks.md` (updated for sqlite-vec). Re-run `/speckit.plan` only if a full plan regen is desired; incremental plan/research/tasks updates already applied.
